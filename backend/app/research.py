@@ -368,6 +368,11 @@ def stores() -> dict[str, dict[str, Any]]:
     return knowledge_layer.status()
 
 
+@router.get("/provider-check")
+def provider_check() -> dict[str, Any]:
+    return knowledge_layer.provider_check()
+
+
 @router.get("/graph/{city}")
 def graph(city: str) -> dict[str, list[dict[str, Any]]]:
     return knowledge_layer.graph(city)

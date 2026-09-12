@@ -76,3 +76,5 @@ The first slice deliberately keeps unsupported findings out of the published fac
 `GET /api/stores` reports the live readiness of the relational, Qdrant, and Graphiti/Neo4j stores. `POST /api/ask` retrieves only verified facts from the latest city run and returns an explicit insufficiency response when the ledger cannot support the question. Set `QDRANT_URL`, `NEO4J_URI`, and `GRAPHITI_ENABLED=true` for deployment integrations; the local experience remains honest when those providers are not configured.
 
 `GET /api/history` returns recent persisted research runs. `GET /api/report/{city}` downloads an evidence-first HTML brief containing verified findings, source links, crawl decisions, knowledge gaps, and methodology.
+
+For deployment diagnostics, open `/api/provider-check`. It tests Qdrant access, Neo4j authentication/database access, and OpenAI authentication without returning credentials. Render's **Logs** tab also records sanitized `qdrant_indexing_failed` or `graphiti_indexing_failed` events.

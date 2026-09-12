@@ -1,6 +1,7 @@
 import os
 import re
 import hashlib
+import logging
 from datetime import datetime, timezone
 from typing import Any
 
@@ -10,6 +11,9 @@ from graphiti_core.llm_client import OpenAIClient
 from neo4j import GraphDatabase
 from openai import OpenAI
 from qdrant_client import QdrantClient, models
+
+
+logger = logging.getLogger("cardio4cities.providers")
 
 
 def _terms(value: str) -> set[str]:
@@ -88,6 +92,7 @@ class KnowledgeLayer:
                 statuses["vector"]["indexed_records"] = count
                 statuses["vector"]["detail"] = f"Indexed {count} evidence passages in Qdrant."
             except Exception as error:
+                logger.exception("qdrant_indexing_failed type=%s", type(error).__name__)
                 statuses["vector"]["status"] = "error"
                 statuses["vector"]["queryable"] = False
                 statuses["vector"]["detail"] = f"Qdrant indexing failed: {type(error).__name__}"
@@ -99,6 +104,7 @@ class KnowledgeLayer:
                 statuses["graph"]["indexed_records"] = count
                 statuses["graph"]["detail"] = f"Indexed {count} verified facts through Graphiti into Neo4j."
             except Exception as error:
+                logger.exception("graphiti_indexing_failed type=%s", type(error).__name__)
                 statuses["graph"]["status"] = "error"
                 statuses["graph"]["queryable"] = False
                 statuses["graph"]["detail"] = f"Graphiti indexing failed: {type(error).__name__}"
@@ -189,6 +195,43 @@ class KnowledgeLayer:
                 return {"nodes": list(nodes.values()), "edges": edges}
         finally:
             driver.close()
+
+    def provider_check(self) -> dict[str, Any]:
+        result: dict[str, Any] = {"qdrant": {}, "neo4j": {}, "graphiti": {}}
+        if self.configuration()["qdrant"]["configured"]:
+            try:
+                QdrantClient(url=self.qdrant_url, api_key=self.qdrant_api_key).get_collections()
+                result["qdrant"] = {"status": "ok", "detail": "Qdrant authentication and API access succeeded."}
+            except Exception as error:
+                result["qdrant"] = {"status": "error", "error_type": type(error).__name__, "detail": self._safe_provider_detail(error)}
+        else:
+            result["qdrant"] = {"status": "not_configured"}
+        if self.configuration()["graphiti"]["configured"]:
+            try:
+                driver = GraphDatabase.driver(self.neo4j_uri, auth=(self.neo4j_username, self.neo4j_password))
+                driver.verify_connectivity()
+                with driver.session(database=self.neo4j_database) as session:
+                    session.run("RETURN 1").consume()
+                driver.close()
+                result["neo4j"] = {"status": "ok", "database": self.neo4j_database, "detail": "Neo4j authentication, connectivity, and database access succeeded."}
+            except Exception as error:
+                result["neo4j"] = {"status": "error", "error_type": type(error).__name__, "detail": self._safe_provider_detail(error)}
+            try:
+                OpenAI(api_key=self.openai_api_key).models.list()
+                result["graphiti"] = {"status": "ok", "detail": "OpenAI authentication succeeded; Graphiti can attempt episode extraction."}
+            except Exception as error:
+                result["graphiti"] = {"status": "error", "error_type": type(error).__name__, "detail": self._safe_provider_detail(error)}
+        else:
+            result["graphiti"] = {"status": "not_configured"}
+        return result
+
+    @staticmethod
+    def _safe_provider_detail(error: Exception) -> str:
+        message = str(error).replace("\n", " ")
+        for secret_name in ("sk-", "neo4j", "QDRANT"):
+            if secret_name in message:
+                return "Provider returned an error; inspect the deployment logs for the sanitized exception category."
+        return message[:240]
 
     def _search_qdrant(self, question: str, city: str) -> list[dict[str, Any]]:
         if not self.status()["vector"]["queryable"]:
