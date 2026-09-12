@@ -1,6 +1,7 @@
 const form = document.querySelector("#research-form");
 const workspace = document.querySelector("#workspace");
 const error = document.querySelector("#error");
+const API_BASE = window.CARDIO_API_BASE || "";
 let researchResult = null;
 let selectedStep = 0;
 
@@ -165,22 +166,22 @@ function renderAdminObservability(result) {
 
 function renderHistory(runs) {
   document.querySelector("#history").innerHTML = runs.length ? runs.map((run) => `
-    <div class="history-row"><div><strong>${escapeHtml(run.city)}${run.country ? `, ${escapeHtml(run.country)}` : ""}</strong><span>${escapeHtml(new Date(run.completed_at).toLocaleString())}</span></div><div class="history-metrics"><span>${run.facts} findings</span><span>${run.gaps} gaps</span><a href="/api/report/${encodeURIComponent(run.city)}" target="_blank">Brief ↓</a></div></div>
+    <div class="history-row"><div><strong>${escapeHtml(run.city)}${run.country ? `, ${escapeHtml(run.country)}` : ""}</strong><span>${escapeHtml(new Date(run.completed_at).toLocaleString())}</span></div><div class="history-metrics"><span>${run.facts} findings</span><span>${run.gaps} gaps</span><a href="${API_BASE}/api/report/${encodeURIComponent(run.city)}" target="_blank">Brief ↓</a></div></div>
   `).join("") : '<p class="empty">No completed research runs yet.</p>';
 }
 
 async function loadHistory() {
-  const response = await fetch("/api/history");
+  const response = await fetch(`${API_BASE}/api/history`);
   if (response.ok) renderHistory(await response.json());
 }
 
 async function loadRuntimeStatus() {
-  const response = await fetch("/api/stores");
+  const response = await fetch(`${API_BASE}/api/stores`);
   if (response.ok) renderStores(await response.json());
 }
 
 async function pollProgress(city) {
-  const response = await fetch(`/api/progress/${encodeURIComponent(city)}`);
+  const response = await fetch(`${API_BASE}/api/progress/${encodeURIComponent(city)}`);
   if (!response.ok) return;
   const progress = await response.json();
   document.querySelector("#progress-stage").textContent = progress.stage;
@@ -192,7 +193,7 @@ async function pollProgress(city) {
 async function loadGraph(city) {
   const view = document.querySelector("#graph-view");
   try {
-    const response = await fetch(`/api/graph/${encodeURIComponent(city)}`);
+    const response = await fetch(`${API_BASE}/api/graph/${encodeURIComponent(city)}`);
     const graph = await response.json();
     document.querySelector("#graph-count").textContent = `${graph.nodes.length} entities`;
     if (!graph.nodes.length) {
@@ -215,7 +216,7 @@ async function askQuestion(event) {
   askButton.disabled = true;
   answer.innerHTML = '<p class="empty">Checking the verified ledger...</p>';
   try {
-    const response = await fetch("/api/ask", {
+    const response = await fetch(`${API_BASE}/api/ask`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ city: researchResult.city, question: questionInput.value.trim() })
@@ -247,7 +248,7 @@ form.addEventListener("submit", async (event) => {
   document.querySelector("#run-status").textContent = "Live run";
   document.querySelector("#workflow").innerHTML = '<p class="empty">Contacting public sources...</p>';
   try {
-    const response = await fetch("/api/research", {
+    const response = await fetch(`${API_BASE}/api/research`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ city, country: country || null })
@@ -263,7 +264,7 @@ form.addEventListener("submit", async (event) => {
     document.querySelector("#workspace-title").textContent = `${result.city} intelligence brief`;
     document.querySelector("#run-status").textContent = "Complete with gaps";
     const reportLink = document.querySelector("#download-report");
-    reportLink.href = `/api/report/${encodeURIComponent(result.city)}`;
+    reportLink.href = `${API_BASE}/api/report/${encodeURIComponent(result.city)}`;
     reportLink.classList.remove("hidden");
     renderWorkflow(result.workflow);
     renderStepOutput();

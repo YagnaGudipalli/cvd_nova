@@ -1,0 +1,1 @@
+window.CARDIO_API_BASE = "";

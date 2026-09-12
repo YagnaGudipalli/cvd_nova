@@ -23,6 +23,12 @@ Open http://127.0.0.1:8000 and enter a city. The current vertical slice performs
 
 The service binds to Render's `$PORT`, uses `/health` as its health check, and serves the frontend and API from one URL. The free instance may sleep when idle and local SQLite data is ephemeral, so use managed PostgreSQL before treating it as production storage.
 
+### GitHub Pages frontend
+
+GitHub Pages can host the static frontend at `https://yagnagudipalli.github.io/cvd_nova/`. It cannot host the FastAPI backend, so deploy the backend with the Render Blueprint first.
+
+Then add a GitHub Actions repository secret named `BACKEND_API_URL` containing the Render API URL, for example `https://cardio4cities-intelligence-studio.onrender.com`. The workflow in `.github/workflows/pages.yml` publishes the frontend and injects that backend URL at deploy time.
+
 ### Local production-shaped run
 
 ```bash
