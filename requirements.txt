@@ -3,4 +3,8 @@ python-dotenv==1.0.1
 fastapi==0.115.6
 httpx==0.28.1
 langgraph==0.2.61
+qdrant-client==1.12.1
+neo4j==5.27.0
+graphiti-core==0.30.2
+openai==3.11.0
 uvicorn[standard]==0.34.0
