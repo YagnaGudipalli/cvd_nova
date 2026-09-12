@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: cardio4cities-intelligence-studio
+    runtime: docker
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: QDRANT_URL
+        sync: false
+      - key: QDRANT_API_KEY
+        sync: false
+      - key: NEO4J_URI
+        sync: false
+      - key: NEO4J_USERNAME
+        value: neo4j
+      - key: NEO4J_PASSWORD
+        sync: false
+      - key: NEO4J_DATABASE
+        value: neo4j
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: GRAPHITI_ENABLED
+        value: "true"

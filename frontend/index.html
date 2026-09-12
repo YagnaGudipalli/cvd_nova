@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CARDIO4Cities Intelligence Studio</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="masthead">
+        <div>
+          <p class="eyebrow">CARDIO4Cities / field intelligence</p>
+          <h1>City intelligence workspace</h1>
+        </div>
+        <span class="status-pill"><span class="status-dot"></span> Live research</span>
+      </header>
+
+      <section class="hero-grid">
+        <div class="hero-copy">
+          <p class="kicker">Evidence-first city briefing</p>
+          <p class="lede">Turn public signals into a source-traceable brief for cardiovascular health conversations.</p>
+          <form id="research-form" class="research-form">
+            <label>
+              City
+              <input id="city" name="city" placeholder="e.g. Nairobi" required />
+            </label>
+            <label>
+              Country <span class="optional">optional</span>
+              <input id="country" name="country" placeholder="e.g. Kenya" />
+            </label>
+            <button type="submit"><span>Start research</span><span aria-hidden="true">↗</span></button>
+          </form>
+          <div id="search-progress" class="search-progress hidden" aria-live="polite"><div class="progress-top"><span id="progress-stage">Preparing research</span><strong id="progress-percent">0%</strong></div><div class="progress-track"><span id="progress-bar"></span></div><p id="progress-message">We will keep you updated as the brief is assembled.</p></div>
+          <p id="error" class="error" role="alert"></p>
+        </div>
+        <div class="signal-panel">
+          <div class="signal-header"><span>Research protocol</span><span>live</span></div>
+          <div class="signal-line"><span>Evidence required</span><strong>100%</strong></div>
+          <div class="signal-line"><span>Unknowns</span><strong>visible</strong></div>
+        </div>
+      </section>
+
+      <section id="workspace" class="workspace pre-run">
+        <div class="workspace-heading">
+          <div>
+            <p class="eyebrow">Research workspace</p>
+            <h2 id="workspace-title">Workspace controls</h2>
+          </div>
+          <div class="heading-actions"><span id="run-status" class="run-status">Running</span><a id="download-report" class="download-button hidden" href="#" target="_blank">Download brief ↓</a></div>
+        </div>
+        <div id="admin-summary" class="admin-summary hidden" role="status"></div>
+        <nav class="workspace-tabs" aria-label="Research workspace sections">
+          <button class="workspace-tab" data-tab="overview" type="button">Overview</button>
+          <button class="workspace-tab" data-tab="evidence" type="button">Evidence <span id="tab-fact-count">0</span></button>
+          <button class="workspace-tab" data-tab="ask" type="button">Ask the brief</button>
+          <button class="workspace-tab" data-tab="graph" type="button">Knowledge graph</button>
+          <button class="workspace-tab" data-tab="history" type="button">History</button>
+          <button class="workspace-tab admin-tab" data-tab="runtime" type="button">Admin / runtime</button>
+        </nav>
+        <div class="tab-panel" data-panel="overview">
+          <div class="workspace-grid">
+            <section class="panel workflow-panel">
+              <div class="panel-title"><span>Workflow trace</span><span id="step-count">0 steps</span></div>
+              <div id="workflow" class="workflow"></div>
+            </section>
+            <section class="panel facts-panel">
+              <div class="panel-title"><span>Step output</span><span id="output-label">Select a step</span></div>
+              <div id="step-output" class="step-output"><p class="empty">Select a workflow step to inspect its output.</p></div>
+              <div id="guardrails" class="guardrails"></div>
+            </section>
+          </div>
+        </div>
+        <div class="tab-panel" data-panel="evidence">
+          <section class="panel evidence-panel">
+            <div class="panel-title"><span>Evidence ledger</span><span id="fact-count">0 findings</span></div>
+            <div class="panel-intro">Claims are grouped by source. Expand a row to inspect the quote, scope, and verification note.</div>
+            <div id="facts" class="facts"></div>
+          </section>
+          <section class="panel gaps-panel">
+            <div class="panel-title"><span>Knowledge gaps</span><span>Do not infer</span></div>
+            <div id="gaps" class="gaps"></div>
+          </section>
+        </div>
+        <div class="tab-panel" data-panel="ask">
+          <section class="panel ask-panel ask-panel-wide">
+            <div class="panel-title"><span>Ask the brief</span><span>Answers use verified evidence only</span></div>
+            <div class="ask-intro">Ask about the researched city. Every answer will show its supporting evidence, or clearly say when the brief cannot support an answer.</div>
+            <form id="ask-form" class="ask-form">
+              <input id="question" placeholder="e.g. What health programs were found?" aria-label="Question about the city brief" required />
+              <button type="submit">Ask ↗</button>
+            </form>
+            <div id="answer" class="answer"><p class="empty">Ask a question after research completes.</p></div>
+          </section>
+        </div>
+        <div class="tab-panel" data-panel="history">
+          <section class="panel history-panel">
+            <div class="panel-title"><span>Institutional memory</span><span>Recent research runs</span></div>
+            <div id="history" class="history"><p class="empty">Research history will appear here.</p></div>
+          </section>
+        </div>
+        <div class="tab-panel" data-panel="graph">
+          <section class="panel graph-panel">
+            <div class="panel-title"><span>Knowledge graph</span><span id="graph-count">0 entities</span></div>
+            <div class="panel-intro">Relationships extracted by Graphiti and stored in Neo4j for this city research run.</div>
+            <div id="graph-view" class="graph-view"><p class="empty">Run research to load the knowledge graph.</p></div>
+          </section>
+        </div>
+        <div class="tab-panel" data-panel="runtime">
+          <section class="panel stores-panel">
+            <div class="panel-title"><span>Runtime status</span><span>Admin view</span></div>
+            <div class="panel-intro">Operational state of the stores used by this research run. This view is intended for administrators and demonstrators.</div>
+            <div id="stores" class="stores"></div>
+          </section>
+          <section class="panel admin-metrics-panel">
+            <div class="panel-title"><span>Evaluation metrics</span><span>Run quality</span></div>
+            <div id="metrics" class="admin-metrics"></div>
+            <div id="quality-chart" class="quality-chart"></div>
+          </section>
+          <section class="panel trace-panel">
+            <div class="panel-title"><span>Trace and tracking log</span><span id="trace-count">0 events</span></div>
+            <div id="trace" class="trace-log"></div>
+          </section>
+          <section class="panel guardrail-panel">
+            <div class="panel-title"><span>Guardrail audit</span><span>Target safety checks</span></div>
+            <div id="admin-guardrails" class="admin-guardrails"></div>
+          </section>
+        </div>
+      </section>
+    </main>
+    <script src="/app.js"></script>
+  </body>
+</html>
