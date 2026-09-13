@@ -8,17 +8,29 @@ The deck is an interactive 8-slide page served at
 
 ## Slides
 
-1. **Title** — understand a city before the first meeting.
-2. **The problem** — public knowledge is everywhere, confidence is not. The
-   failure mode is being confidently wrong in the room.
-3. **Problem decomposition** — the five dimensions "understanding a city" was
-   defined as, and the deliberate exclusion of named individuals.
-4. **Agentic design** — no agent both produces a claim and approves it; the two
-   gates and the consequence of a refusal.
-5. **Data architecture** — three stores, three different questions.
-6. **Trust and evidence** — no quote, no fact; scope flagging; unknowns as output.
-7. **User experience** — the six-step path a City Lead actually walks.
-8. **Trade-offs and limitations** — what was cut, what is still shallow, what next.
+Eight slides, following the case study's brief for the deck: the problem as
+understood, the AI solution and architecture, trust and evidence, the user
+experience, and trade-offs and limitations.
+
+1. **Title** — understand a city before the first meeting; four headline numbers.
+2. **Problem and decomposition** — the failure mode is being confidently wrong in the
+   room; the five dimensions and the exclusion of named individuals.
+3. **Architecture and agents** — ten LangGraph nodes, three gates, the bounded
+   sufficiency cycle, and a checker that is never the extracting model.
+4. **Knowledge management and retrieval** — three stores for three questions,
+   concurrent vector and graph retrieval, cited or declined answers.
+5. **Trust and evidence** — quote grounding, numeric guard, scope flagging, the gap
+   ledger, and degraded runs that say so.
+6. **Engineering decisions** — one table of choices, each with its measured evidence:
+   model per job, deterministic checks first, strict schemas, rate-limit handling,
+   background graph build, sizing to the free host.
+7. **User experience** — depth choice with measured and estimated times, and the path
+   a City Lead walks.
+8. **Trade-offs and limitations** — what was cut, what free tiers cost, what is not
+   modelled, what comes next, and the demo path.
+
+Only the Quick depth time (42 s) is measured; Balanced and Thorough are estimates and
+are labelled as such on slide 7.
 
 ## Demo path
 

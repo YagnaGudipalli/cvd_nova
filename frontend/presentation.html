@@ -49,12 +49,12 @@
     .canvas {
       position: relative;
       width: min(1180px, 100%);
+      /* No explicit min-height: an aspect-ratio box then grows to fit dense content instead of clipping it. */
       aspect-ratio: 16 / 9;
-      min-height: min(640px, 82vh);
       background: var(--paper);
       border: 1px solid var(--line);
       box-shadow: 0 18px 44px rgba(23, 34, 34, .12);
-      padding: clamp(28px, 4.2vw, 62px);
+      padding: clamp(28px, 4vw, 56px) clamp(28px, 4.2vw, 62px) clamp(48px, 5vw, 70px);
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -80,7 +80,7 @@
       font: 500 11px 'DM Mono', monospace;
       text-transform: uppercase;
       color: var(--green);
-      margin-bottom: clamp(14px, 2vh, 26px);
+      margin-bottom: clamp(12px, 1.8vh, 22px);
     }
 
     h1 {
@@ -92,27 +92,28 @@
     }
 
     h2 {
-      font-size: clamp(1.7rem, 3.4vw, 3.1rem);
+      font-size: clamp(1.6rem, 3vw, 2.8rem);
       line-height: 1.02;
-      letter-spacing: -1.6px;
-      max-width: 20ch;
-      margin: 0 0 20px;
+      letter-spacing: -1.4px;
+      max-width: 24ch;
+      margin: 0 0 16px;
     }
 
     p {
-      font-size: clamp(.95rem, 1.15vw, 1.2rem);
+      font-size: clamp(.92rem, 1.1vw, 1.15rem);
       line-height: 1.5;
       color: var(--muted);
-      max-width: 62ch;
-      margin: 0 0 14px;
+      max-width: 66ch;
+      margin: 0 0 12px;
     }
 
     p strong { color: var(--ink); font-weight: 700; }
+    code { font: 500 .86em 'DM Mono', monospace; color: var(--ink); background: #e9f0eb; padding: 0 4px; }
 
     .slide-no {
       position: absolute;
       right: clamp(24px, 4vw, 58px);
-      bottom: clamp(22px, 3.4vw, 46px);
+      bottom: clamp(18px, 2.6vw, 34px);
       z-index: 2;
       font: 500 11px 'DM Mono', monospace;
       color: var(--green);
@@ -121,33 +122,35 @@
     .footnote {
       position: absolute;
       left: clamp(28px, 4.2vw, 62px);
-      bottom: clamp(22px, 3.4vw, 46px);
+      bottom: clamp(18px, 2.6vw, 34px);
       z-index: 2;
       font: 500 10px 'DM Mono', monospace;
       text-transform: uppercase;
       color: #9aa6a1;
     }
 
-    .grid { display: grid; gap: 12px; margin-top: clamp(16px, 2.6vh, 32px); }
+    .grid { display: grid; gap: 10px; margin-top: clamp(12px, 2vh, 24px); }
     .g2 { grid-template-columns: repeat(2, 1fr); }
     .g3 { grid-template-columns: repeat(3, 1fr); }
+    .g4 { grid-template-columns: repeat(4, 1fr); }
     .g5 { grid-template-columns: repeat(5, 1fr); }
 
     .card {
       background: #fff;
       border: 1px solid var(--line);
       border-top: 3px solid var(--green);
-      padding: clamp(12px, 1.3vw, 18px);
+      padding: clamp(10px, 1.2vw, 16px);
     }
     .card b {
       display: block;
       font: 500 10px 'DM Mono', monospace;
       text-transform: uppercase;
       color: var(--green);
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
-    .card strong { display: block; font-size: clamp(.9rem, 1.05vw, 1.05rem); line-height: 1.25; margin-bottom: 6px; }
-    .card span { display: block; color: var(--muted); font-size: clamp(.74rem, .85vw, .88rem); line-height: 1.45; }
+    .card strong { display: block; font-size: clamp(.86rem, 1vw, 1.02rem); line-height: 1.25; margin-bottom: 5px; }
+    .card span { display: block; color: var(--muted); font-size: clamp(.72rem, .82vw, .86rem); line-height: 1.45; }
+    .card em { font-style: normal; color: var(--green); font-weight: 700; }
 
     .card.warn { border-top-color: var(--coral); }
     .card.warn b { color: var(--coral); }
@@ -155,42 +158,63 @@
     .quote {
       border-left: 5px solid var(--coral);
       background: #fff;
-      padding: clamp(14px, 1.6vw, 22px) clamp(16px, 1.8vw, 26px);
-      max-width: 58ch;
-      font-size: clamp(1rem, 1.35vw, 1.35rem);
+      padding: clamp(12px, 1.4vw, 20px) clamp(16px, 1.8vw, 24px);
+      max-width: 62ch;
+      font-size: clamp(.98rem, 1.3vw, 1.3rem);
       line-height: 1.35;
       font-weight: 600;
-      margin: clamp(14px, 2vh, 26px) 0 0;
+      margin: clamp(12px, 1.8vh, 22px) 0 0;
     }
 
-    .flow { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: clamp(16px, 2.6vh, 30px); }
+    .flow { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-top: clamp(12px, 2vh, 24px); }
     .flow span {
       background: var(--mint);
       color: var(--ink);
-      padding: 12px 16px;
+      padding: 9px 12px;
       font-weight: 700;
-      font-size: clamp(.8rem, .95vw, 1rem);
+      font-size: clamp(.74rem, .88vw, .95rem);
     }
+    /* A border keeps pills visible where they sit over the mint corner shape. */
+    .flow span { border: 1px solid #b9dfc4; }
     .flow span.gate { background: #fff8e4; border: 1px solid #eedb9b; }
     .flow i { color: var(--coral); font-style: normal; font-weight: 700; }
 
-    figure { margin: clamp(12px, 2vh, 24px) 0 0; }
+    .loop {
+      margin-top: 8px;
+      font: 500 11px 'DM Mono', monospace;
+      color: var(--green);
+      text-transform: uppercase;
+    }
+
+    figure { margin: clamp(10px, 1.6vh, 20px) 0 0; }
     figure svg { display: block; width: 100%; height: auto; }
 
-    ul.beats { list-style: none; padding: 0; margin: clamp(14px, 2.2vh, 26px) 0 0; }
+    ul.beats { list-style: none; padding: 0; margin: clamp(12px, 2vh, 24px) 0 0; }
     ul.beats li {
       display: grid;
       grid-template-columns: 26px 1fr;
       gap: 14px;
       align-items: baseline;
-      padding: 10px 0;
+      padding: 9px 0;
       border-bottom: 1px solid var(--line);
-      font-size: clamp(.86rem, 1vw, 1.05rem);
+      font-size: clamp(.84rem, .98vw, 1.02rem);
       color: var(--muted);
-      max-width: 78ch;
+      max-width: 82ch;
     }
     ul.beats li b { font: 500 10px 'DM Mono', monospace; color: var(--green); }
     ul.beats li strong { color: var(--ink); }
+
+    table.dt { width: 100%; border-collapse: collapse; margin-top: clamp(10px, 1.6vh, 20px); background: #fff; border: 1px solid var(--line); }
+    table.dt th, table.dt td { text-align: left; vertical-align: top; padding: clamp(6px, .7vw, 10px) clamp(8px, .9vw, 12px); border-bottom: 1px solid var(--line); }
+    table.dt th { font: 500 10px 'DM Mono', monospace; text-transform: uppercase; color: var(--green); }
+    table.dt td { font-size: clamp(.7rem, .8vw, .86rem); line-height: 1.4; color: var(--muted); }
+    table.dt td:first-child { color: var(--ink); font-weight: 700; white-space: nowrap; }
+    table.dt td.pick { color: var(--ink); }
+
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: clamp(12px, 2vh, 22px); }
+    .stat { background: #fff; border: 1px solid var(--line); padding: clamp(10px, 1.1vw, 14px); }
+    .stat b { display: block; font-size: clamp(1.3rem, 2.2vw, 2rem); letter-spacing: -1px; line-height: 1; }
+    .stat span { display: block; color: var(--muted); font-size: clamp(.7rem, .8vw, .84rem); line-height: 1.35; margin-top: 6px; }
 
     /* fixed chrome */
     .chrome {
@@ -227,7 +251,7 @@
       z-index: 20;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 7px;
     }
     .rail a {
       display: block;
@@ -239,13 +263,15 @@
     .rail a.active { background: var(--green); }
 
     @media (max-width: 820px) {
-      .canvas { aspect-ratio: auto; min-height: 0; padding: 30px 24px 64px; }
-      .slide { min-height: auto; padding: 14px; }
+      .canvas { aspect-ratio: auto; padding: 30px 20px 30px; }
+      .slide { min-height: auto; padding: 12px; }
       .deck { height: auto; overflow: visible; scroll-snap-type: none; }
-      .g2, .g3, .g5 { grid-template-columns: 1fr; }
+      .g2, .g3, .g4, .g5, .stats { grid-template-columns: 1fr; }
       .canvas::after { right: -34%; width: 74%; }
       .rail { display: none; }
-      .slide-no, .footnote { position: static; display: block; margin-top: 22px; }
+      .slide-no, .footnote { position: static; display: block; margin-top: 18px; }
+      .table-wrap { overflow-x: auto; }
+      table.dt td:first-child { white-space: normal; }
     }
 
     @media print {
@@ -261,194 +287,164 @@
 
 <main class="deck" id="deck">
 
-  <!-- 01 -->
+  <!-- 01 · Title -->
   <section class="slide" id="s1">
-    <div class="canvas">
-      <div class="content">
-        <span class="eyebrow">CARDIO4Cities / AI engineer case study</span>
-        <h1>Understand a city before the first meeting.</h1>
-        <p>An evidence-first research workspace that prepares a City Lead for government and healthcare conversations &mdash; built so that every sentence can be traced back to a source, and everything unknown stays visible.</p>
+    <div class="canvas"><div class="content">
+      <span class="eyebrow">CARDIO4Cities / AI engineer case study</span>
+      <h1>Understand a city before the first meeting.</h1>
+      <p>An evidence-first research workspace for City Leads preparing government and healthcare conversations. Every sentence traces to a source, everything unknown stays visible, and the whole stack runs on free tiers.</p>
+      <div class="stats">
+        <div class="stat"><b>10</b><span>LangGraph agents, three of them gates</span></div>
+        <div class="stat"><b>3</b><span>datastores: ledger, vectors, knowledge graph</span></div>
+        <div class="stat"><b>42 s</b><span>measured Quick brief, end to end</span></div>
+        <div class="stat"><b>$0</b><span>models, discovery, storage and hosting</span></div>
       </div>
-      <span class="footnote">Live research &middot; LangGraph &middot; three datastores</span>
-      <span class="slide-no">01 / 08</span>
     </div>
+    <span class="footnote">Live research · open-weights models · no pre-seeded city data</span>
+    <span class="slide-no">01 / 08</span></div>
   </section>
 
-  <!-- 02 -->
+  <!-- 02 · Problem and decomposition -->
   <section class="slide" id="s2">
-    <div class="canvas">
-      <div class="content">
-        <span class="eyebrow">The problem as we understand it</span>
-        <h2>Public knowledge is everywhere. Confidence is not.</h2>
-        <p>Preparing for a new city today means days of manual reading across government portals, health statistics, academic papers, policy documents and stakeholder networks. The output is a document in one person&rsquo;s folder: fragmented, hard to verify, impossible to reuse when the next city joins.</p>
-        <p>The failure mode that matters is not <strong>slow</strong>. It is <strong>confidently wrong in a room full of health officials</strong> &mdash; a national statistic quoted as a city one, a programme that ended two years ago, a name nobody can source.</p>
-        <div class="quote">So the goal is not a summariser. It is a research system whose answers can be interrogated.</div>
+    <div class="canvas"><div class="content">
+      <span class="eyebrow">The problem, and how it was decomposed</span>
+      <h2>The failure mode is not slow. It is confidently wrong.</h2>
+      <p>Preparing for a new city means days of reading government portals, statistics, papers and policy documents &mdash; ending in a document in one person&rsquo;s folder that nobody can verify or reuse. The risk that matters is walking into a room of health officials with <strong>a national statistic quoted as a city one</strong>, a programme that ended years ago, or a figure nobody can source. So the goal is not a summariser; it is a research system whose answers can be interrogated.</p>
+      <p>&ldquo;Understanding a city&rdquo; is committed to five dimensions, <strong>enforced by the workflow</strong>: planning queries each one and the sufficiency gate measures coverage against them.</p>
+      <div class="grid g5">
+        <div class="card"><b>01 · Burden</b><strong>Disease and risk</strong><span>CVD, hypertension, diabetes, dyslipidaemia.</span></div>
+        <div class="card"><b>02 · Programmes</b><strong>What already runs</strong><span>And who runs it.</span></div>
+        <div class="card"><b>03 · Policy</b><strong>Governance</strong><span>Municipal and national initiatives in force.</span></div>
+        <div class="card"><b>04 · Access</b><strong>Delivery</strong><span>Facilities, workforce, pathways to care.</span></div>
+        <div class="card"><b>05 · Actors</b><strong>Institutions</strong><span>Organisations in the system.</span></div>
       </div>
-      <span class="slide-no">02 / 08</span>
+      <p style="margin-top:12px"><strong>Deliberate exclusion:</strong> the system never characterises named individuals or their attitudes &mdash; exactly the claims public sources cannot support.</p>
     </div>
+    <span class="slide-no">02 / 08</span></div>
   </section>
 
-  <!-- 03 -->
+  <!-- 03 · Architecture and agentic design -->
   <section class="slide" id="s3">
-    <div class="canvas">
-      <div class="content">
-        <span class="eyebrow">Problem decomposition</span>
-        <h2>What &ldquo;understanding a city&rdquo; was decomposed into.</h2>
-        <p>An open question needs a committed answer. We defined city understanding as five retrievable dimensions, and every research plan expands into queries across them.</p>
-        <div class="grid g5">
-          <div class="card"><b>01</b><strong>Burden</strong><span>Cardiovascular risk, hypertension, diabetes, dyslipidaemia.</span></div>
-          <div class="card"><b>02</b><strong>Programmes</strong><span>What already runs, and who runs it.</span></div>
-          <div class="card"><b>03</b><strong>Policy</strong><span>Municipal and national initiatives in force.</span></div>
-          <div class="card"><b>04</b><strong>Access</strong><span>Facilities, workforce, pathways to care.</span></div>
-          <div class="card"><b>05</b><strong>Actors</strong><span>Organisations and institutions in the system.</span></div>
-        </div>
-        <p style="margin-top:20px"><strong>Deliberate exclusion:</strong> the system never characterises named individuals or their attitudes. Those are exactly the claims a public source cannot support, and the ones most damaging to get wrong.</p>
+    <div class="canvas"><div class="content">
+      <span class="eyebrow">AI solution and architecture</span>
+      <h2>Ten agents. None both produces a claim and approves it.</h2>
+      <div class="flow">
+        <span>Intake</span><i>&rarr;</i><span>Plan</span><i>&rarr;</i><span>Discover</span><i>&rarr;</i>
+        <span class="gate">Crawl gate</span><i>&rarr;</i><span>Extract</span><i>&rarr;</i><span>Claims</span><i>&rarr;</i>
+        <span class="gate">Fact check</span><i>&rarr;</i><span class="gate">Sufficiency</span><i>&rarr;</i><span>Index</span><i>&rarr;</i><span>Report</span>
       </div>
-      <span class="slide-no">03 / 08</span>
+      <div class="loop">&#8634; Sufficiency &rarr; Plan when fewer than 3 of 5 dimensions have city-level evidence · bounded by the chosen depth</div>
+      <div class="grid g4">
+        <div class="card warn"><b>Gate · before crawling</b><strong>Crawlability</strong><span>robots.txt is read before the first byte is fetched; a refused source stays listed with its reason.</span></div>
+        <div class="card"><b>Producer</b><strong>Claim extraction</strong><span>The only agent allowed to phrase a claim &mdash; never allowed to publish one. Reads HTML, full-text XML and PDF.</span></div>
+        <div class="card warn"><b>Gate · before publishing</b><strong>Independent fact check</strong><span><em>Never the model that extracted the claim.</em> Can return UNSUPPORTED or SCOPE_MISMATCH, which withhold or flag.</span></div>
+        <div class="card warn"><b>Gate · before the brief</b><strong>Sufficiency</strong><span>Spends more research budget, or publishes with every gap declared.</span></div>
+      </div>
+      <p style="margin-top:12px">Discovery uses keyless public APIs &mdash; OpenAlex, Europe PMC, Wikipedia &mdash; rather than scraped search engines. <code>GET /api/workflow</code> renders this structure from the compiled graph, so the diagram cannot drift from the code.</p>
     </div>
+    <span class="slide-no">03 / 08</span></div>
   </section>
 
-  <!-- 04 -->
+  <!-- 04 · Knowledge management -->
   <section class="slide" id="s4">
-    <div class="canvas">
-      <div class="content">
-        <span class="eyebrow">AI and agentic design</span>
-        <h2>No agent both produces a claim and approves it.</h2>
-        <div class="flow">
-          <span>Intake</span><i>&rarr;</i>
-          <span>Plan</span><i>&rarr;</i>
-          <span>Discover</span><i>&rarr;</i>
-          <span class="gate">Crawl gate</span><i>&rarr;</i>
-          <span>Extract</span><i>&rarr;</i>
-          <span class="gate">Fact check</span><i>&rarr;</i>
-          <span>Index</span><i>&rarr;</i>
-          <span>Brief</span>
-        </div>
-        <div class="grid g3">
-          <div class="card warn"><b>Gate &mdash; before crawling</b><strong>Crawlability agent</strong><span>robots.txt is read before the first byte is fetched. A disallowed source is still listed, with its refusal reason, so the user can follow it by hand.</span></div>
-          <div class="card warn"><b>Gate &mdash; before publishing</b><strong>Independent fact checker</strong><span>Separate from the agent that produced the claim, and able to conclude &ldquo;unsupported&rdquo;. Withheld claims never reach the brief.</span></div>
-          <div class="card"><b>Consequence</b><strong>Refusals become output</strong><span>Every block lands in the knowledge gap ledger with topic, reason and URL &mdash; shown next to the findings, not hidden in a log.</span></div>
-        </div>
+    <div class="canvas"><div class="content">
+      <span class="eyebrow">Knowledge management and retrieval</span>
+      <h2>Three stores, because there are three different questions.</h2>
+      <table class="dt">
+        <tr><th>Store</th><th>Holds</th><th>Answers</th><th>Why not the others</th></tr>
+        <tr><td>Relational<br>SQLite</td><td>Runs, sources, crawl decisions, facts, gaps, traces, metrics</td><td>&ldquo;What did the system decide, and when?&rdquo;</td><td>Needs exact reads and a schema, not similarity. The audit record.</td></tr>
+        <tr><td>Vector<br>Qdrant</td><td>Evidence passages with full provenance</td><td>&ldquo;What evidence is near this question, in my words?&rdquo;</td><td>City-filtered; collection named after the embedder, so vectors from two models can never mix; idempotent point IDs.</td></tr>
+        <tr><td>Graph<br>Graphiti + Neo4j</td><td>Typed Organizations, Programmes, Policies, Indicators, Places</td><td>&ldquo;Who is connected to what, and since when?&rdquo;</td><td>A traversal, not a search. Built in the background so the brief never waits for it.</td></tr>
+      </table>
+      <div class="grid g3">
+        <div class="card"><b>Retrieval</b><strong>Vector and graph, concurrently</strong><span>Qdrant for semantic recall and Graphiti search for relationships, with the ledger as fallback.</span></div>
+        <div class="card"><b>Answers</b><strong>Cited or declined</strong><span>Synthesis uses numbered evidence only; citations resolve to stored records, not model recollection.</span></div>
+        <div class="card"><b>Embeddings</b><strong>One embedder everywhere</strong><span>Shared by Qdrant, Graphiti and reranking: local bge-small, or Gemini on the 512 MB host.</span></div>
       </div>
-      <span class="footnote">Orchestrated as a LangGraph state graph, with a trace event per stage</span>
-      <span class="slide-no">04 / 08</span>
     </div>
+    <span class="slide-no">04 / 08</span></div>
   </section>
 
-  <!-- 05 -->
+  <!-- 05 · Trust and evidence -->
   <section class="slide" id="s5">
-    <div class="canvas">
-      <div class="content">
-        <span class="eyebrow">Knowledge management</span>
-        <h2>Three stores, because there are three different questions.</h2>
-        <figure>
-          <svg viewBox="0 0 1000 250" role="img" aria-label="Three datastores: relational ledger, Qdrant vector store, and Graphiti with Neo4j, each with its role and the question it answers.">
-            <g font-family="Manrope, sans-serif">
-              <rect x="0" y="0" width="316" height="196" fill="#ffffff" stroke="#d8e0dc" stroke-width="1.5" />
-              <rect x="0" y="0" width="316" height="4" fill="#1b7654" />
-              <text x="22" y="38" font-family="'DM Mono', monospace" font-size="11" fill="#1b7654">RELATIONAL</text>
-              <text x="22" y="66" font-size="18" font-weight="700" fill="#172222">Run ledger</text>
-              <text x="22" y="96" font-size="13" fill="#687575">Runs, sources, crawl decisions,</text>
-              <text x="22" y="116" font-size="13" fill="#687575">facts, gaps, guardrails, metrics.</text>
-              <text x="22" y="156" font-size="12.5" font-weight="700" fill="#172222">&ldquo;What did the system decide,</text>
-              <text x="22" y="174" font-size="12.5" font-weight="700" fill="#172222">and when?&rdquo;</text>
-
-              <rect x="342" y="0" width="316" height="196" fill="#ffffff" stroke="#d8e0dc" stroke-width="1.5" />
-              <rect x="342" y="0" width="316" height="4" fill="#1b7654" />
-              <text x="364" y="38" font-family="'DM Mono', monospace" font-size="11" fill="#1b7654">VECTOR &middot; QDRANT</text>
-              <text x="364" y="66" font-size="18" font-weight="700" fill="#172222">Evidence passages</text>
-              <text x="364" y="96" font-size="13" fill="#687575">Quotes with full provenance,</text>
-              <text x="364" y="116" font-size="13" fill="#687575">filtered by research city.</text>
-              <text x="364" y="156" font-size="12.5" font-weight="700" fill="#172222">&ldquo;What evidence is near this</text>
-              <text x="364" y="174" font-size="12.5" font-weight="700" fill="#172222">question, in my words?&rdquo;</text>
-
-              <rect x="684" y="0" width="316" height="196" fill="#ffffff" stroke="#d8e0dc" stroke-width="1.5" />
-              <rect x="684" y="0" width="316" height="4" fill="#1b7654" />
-              <text x="706" y="38" font-family="'DM Mono', monospace" font-size="11" fill="#1b7654">GRAPH &middot; GRAPHITI + NEO4J</text>
-              <text x="706" y="66" font-size="18" font-weight="700" fill="#172222">Institutional memory</text>
-              <text x="706" y="96" font-size="13" fill="#687575">Organisations, programmes,</text>
-              <text x="706" y="116" font-size="13" fill="#687575">policies and their relationships.</text>
-              <text x="706" y="156" font-size="12.5" font-weight="700" fill="#172222">&ldquo;Who is connected to what,</text>
-              <text x="706" y="174" font-size="12.5" font-weight="700" fill="#172222">and since when?&rdquo;</text>
-
-              <text x="0" y="232" font-family="'DM Mono', monospace" font-size="11" fill="#687575">One store would make two of these questions slow and the third one lossy.</text>
-            </g>
-          </svg>
-        </figure>
+    <div class="canvas"><div class="content">
+      <span class="eyebrow">Trustworthiness and evidence</span>
+      <h2>No located quote, no fact.</h2>
+      <p>Every finding carries its source URL and title, a verbatim quote, geographic scope, verdict, <strong>the model that verified it</strong>, and a confidence. The strongest guarantees are mechanical &mdash; they do not depend on a model behaving well.</p>
+      <div class="grid g3">
+        <div class="card"><b>Guard 01 · grounding</b><strong>The quote must exist in the source</strong><span>The model&rsquo;s quote is searched for in the full document and the stored span is the one found there. An unlocatable quote is discarded.</span></div>
+        <div class="card"><b>Guard 02 · numeric</b><strong>Figures must appear in the evidence</strong><span>A number in the claim that is absent from its quote is automatically UNSUPPORTED &mdash; no model opinion involved.</span></div>
+        <div class="card"><b>Guard 03 · scope</b><strong>National &ne; city</strong><span>Scope is a field on every fact. National evidence is published only with an explicit &ldquo;not a city figure&rdquo; warning.</span></div>
       </div>
-      <span class="slide-no">05 / 08</span>
+      <div class="grid g2">
+        <div class="card warn"><b>Unknowns are output</b><strong>A gap ledger beside the findings</strong><span>Withheld, blocked, unreachable and missing evidence each land there with a reason &mdash; the questions to take into the meeting.</span></div>
+        <div class="card warn"><b>Degraded runs say so</b><strong>No silent downgrade</strong><span>A fact checked by rules instead of a model raises a guardrail warning and is counted; a runtime banner names any reduced capability.</span></div>
+      </div>
     </div>
+    <span class="slide-no">05 / 08</span></div>
   </section>
 
-  <!-- 06 -->
+  <!-- 06 · Engineering decisions -->
   <section class="slide" id="s6">
-    <div class="canvas">
-      <div class="content">
-        <span class="eyebrow">Trustworthiness and evidence</span>
-        <h2>No quote, no fact.</h2>
-        <p>Every finding carries a source URL, a source title, a verbatim evidence quote, a geographic scope, a verification status and a confidence. &ldquo;Where did this come from?&rdquo; is one click, on every row.</p>
-        <div class="grid g3">
-          <div class="card"><b>Fabrication</b><strong>Nothing is invented</strong><span>No statistic, person or attitude is generated. If the evidence is not in a retrieved source, the claim does not exist.</span></div>
-          <div class="card"><b>Scope</b><strong>National &ne; city</strong><span>Scope is a field on every record. Unresolved scope is flagged in the open, not silently assumed to be city-level.</span></div>
-          <div class="card"><b>Absence</b><strong>Unknowns are output</strong><span>&ldquo;Insufficient verified evidence was found&rdquo; is a valid, useful answer &mdash; and the gap ledger says what is still missing.</span></div>
-        </div>
-        <div class="quote">The thing a City Lead can take into the room is not the summary. It is the citation underneath it.</div>
-      </div>
-      <span class="slide-no">06 / 08</span>
+    <div class="canvas"><div class="content">
+      <span class="eyebrow">Engineering decisions &middot; measured before made</span>
+      <h2>Trust is never traded. Time, tokens and cost are.</h2>
+      <table class="dt">
+        <tr><th>Decision</th><th>Why</th><th>Evidence</th></tr>
+        <tr><td>Open-weights on Groq</td><td class="pick">Free, fast, no lock-in &mdash; the same models run on Ollama or vLLM. A paid API added cost per run; a local 14B model does not fit 8 GB.</td><td>Graphiti reached OpenAI in 3 places regardless of config; all replaced</td></tr>
+        <tr><td>A model per job</td><td class="pick">Extraction rotates across qwen3.8-27b, gpt-oss-120b and gpt-oss-20b; checking uses any model <em>except</em> the extractor; the graph has its own.</td><td>~3,500 tokens per extraction call vs 8,000 per minute per model</td></tr>
+        <tr><td>Deterministic first</td><td class="pick">robots.txt, quote grounding and the numeric guard run before any model; a failing claim never costs checker tokens.</td><td>Relevance windowing sends 6,000 chars, not the first 14,000</td></tr>
+        <tr><td>Strict schemas, low reasoning</td><td class="pick">Schema-constrained verdicts and low effort on the checker model.</td><td>3&times; fewer tokens, 3.4&times; faster, 16/16 valid (was 5/16 empty)</td></tr>
+        <tr><td>A rate limit is not an outage</td><td class="pick">Shared per-model cooldown, failover to the model free soonest, errors classified by code, not by message words.</td><td>Once 75 rejected requests to land 16; extraction 383 s &rarr; seconds</td></tr>
+        <tr><td>Brief first, graph later</td><td class="pick">Research is a background job the UI polls; Graphiti builds after the brief is returned.</td><td>A dropped connection no longer loses the result</td></tr>
+        <tr><td>Sized to the free host</td><td class="pick">On 512 MB, embeddings move to Gemini; each provider only ever receives its own key.</td><td>Idle 394 MB &rarr; 182 MB; peak 186 MB in a full run</td></tr>
+      </table>
     </div>
+    <span class="footnote">Every model role is an environment variable over the OpenAI-compatible wire format</span>
+    <span class="slide-no">06 / 08</span></div>
   </section>
 
-  <!-- 07 -->
+  <!-- 07 · User experience -->
   <section class="slide" id="s7">
-    <div class="canvas">
-      <div class="content">
-        <span class="eyebrow">User experience</span>
-        <h2>Type a city. Follow the evidence.</h2>
-        <p>The user is a City Lead, not an engineer. Progress is narrated in plain language while the run is live, and the workspace opens on findings &mdash; not on infrastructure.</p>
-        <ul class="beats">
-          <li><b>01</b><span><strong>Start.</strong> One field. Any city, including one never researched before.</span></li>
-          <li><b>02</b><span><strong>Watch.</strong> Plain-language progress: finding sources, checking access, reading, checking evidence.</span></li>
-          <li><b>03</b><span><strong>Read.</strong> Findings and knowledge gaps side by side, each expandable to its quote and source.</span></li>
-          <li><b>04</b><span><strong>Explore.</strong> The knowledge graph shows how organisations, programmes and policies connect.</span></li>
-          <li><b>05</b><span><strong>Ask.</strong> Questions answered from verified evidence only, with the citations attached.</span></li>
-          <li><b>06</b><span><strong>Take it with you.</strong> A downloadable brief, and a history that makes the next run cumulative.</span></li>
-        </ul>
-      </div>
-      <span class="footnote">Runtime and evaluation metrics live behind a separate admin tab</span>
-      <span class="slide-no">07 / 08</span>
+    <div class="canvas"><div class="content">
+      <span class="eyebrow">User experience</span>
+      <h2>Type a city. Choose the wait. Follow the evidence.</h2>
+      <p>The user is a City Lead, not an engineer. Progress is narrated in plain language, and the workspace opens on findings &mdash; not on infrastructure.</p>
+      <table class="dt">
+        <tr><th>Depth</th><th>Sources</th><th>Rounds</th><th>Time</th></tr>
+        <tr><td>Quick</td><td>5</td><td>1 &mdash; no second round</td><td class="pick"><strong>42 s measured</strong></td></tr>
+        <tr><td>Balanced</td><td>8</td><td>up to 2, second at half size</td><td class="pick">about 2&ndash;4 min, estimated</td></tr>
+        <tr><td>Thorough</td><td>12</td><td>up to 2, second at half size</td><td class="pick">about 4&ndash;8 min, estimated</td></tr>
+      </table>
+      <ul class="beats">
+        <li><b>01</b><span><strong>Watch.</strong> A progress bar that never moves backwards, with round labels and a live &ldquo;4 of 10 sources&rdquo; count.</span></li>
+        <li><b>02</b><span><strong>Read.</strong> Findings and gaps side by side, each expandable to its quote, scope and verifier.</span></li>
+        <li><b>03</b><span><strong>Explore and ask.</strong> The knowledge graph fills in behind the brief; questions are answered from verified evidence with citations.</span></li>
+        <li><b>04</b><span><strong>Take it with you.</strong> A downloadable brief, and a history that makes the next run cumulative.</span></li>
+      </ul>
     </div>
+    <span class="slide-no">07 / 08</span></div>
   </section>
 
-  <!-- 08 -->
+  <!-- 08 · Trade-offs and limitations -->
   <section class="slide" id="s8">
-    <div class="canvas">
-      <div class="content">
-        <span class="eyebrow">Trade-offs and limitations</span>
-        <h2>Working end to end beats half-built ambition.</h2>
-        <div class="grid g2">
-          <div class="card"><b>What we cut</b><strong>Breadth, and a human review queue</strong><span>Few topic queries, few sources per run, no reviewer step. The fact-check gate plus a visible gap ledger buys most of the safety for a fraction of the time.</span></div>
-          <div class="card warn"><b>What is still shallow</b><strong>Claim extraction and verification</strong><span>Findings are closer to source-level than statement-level, and the verifier reasons about evidence shape more than evidence meaning. This is the first thing to deepen.</span></div>
-          <div class="card"><b>Not modelled</b><strong>Conflicting sources</strong><span>Two sources that disagree both appear with their quotes. Detecting and adjudicating contradiction is real work, consciously deferred.</span></div>
-          <div class="card"><b>Next</b><strong>Depth, then durability</strong><span>Grounded claim extraction, graph traversal inside the answer path, a second discovery source, managed PostgreSQL, authentication.</span></div>
-        </div>
-        <p style="margin-top:18px"><strong>Demo path:</strong> pick an unseen city &rarr; walk the workflow &rarr; open a finding to its quote &rarr; inspect the gaps &rarr; explore the graph &rarr; ask a question &rarr; download the brief.</p>
+    <div class="canvas"><div class="content">
+      <span class="eyebrow">Trade-offs and limitations</span>
+      <h2>Working end to end beats half-built ambition.</h2>
+      <div class="grid g2">
+        <div class="card"><b>What we cut</b><strong>Human review, OCR, authentication</strong><span>The fact-check gate plus a visible gap ledger buys most of a review queue&rsquo;s safety for a fraction of the time. Scanned PDFs are flagged as needing OCR.</span></div>
+        <div class="card warn"><b>What free tiers cost</b><strong>Latency and a sleeping app</strong><span>Rate limits set the pace of extraction; the first request after idle is slow; SQLite history resets on restart while vectors and graph persist.</span></div>
+        <div class="card warn"><b>Not modelled</b><strong>Conflicting sources</strong><span>Two sources that disagree both appear with their quotes. Adjudicating contradiction is real work, consciously deferred.</span></div>
+        <div class="card"><b>Next</b><strong>Durability, then depth</strong><span>PostgreSQL and authentication; a paid tier to lift rate limits; contradiction detection; a true cross-encoder reranker.</span></div>
       </div>
-      <span class="slide-no">08 / 08</span>
+      <div class="quote">Demo: an unseen city &rarr; choose a depth &rarr; walk the workflow &rarr; open a finding to its quote &rarr; inspect the gaps &rarr; explore the graph &rarr; ask a question &rarr; download the brief.</div>
     </div>
+    <span class="slide-no">08 / 08</span></div>
   </section>
 
 </main>
 
-<nav class="rail" aria-label="Slide navigation">
-  <a href="#s1" class="active" aria-label="Slide 1"></a>
-  <a href="#s2" aria-label="Slide 2"></a>
-  <a href="#s3" aria-label="Slide 3"></a>
-  <a href="#s4" aria-label="Slide 4"></a>
-  <a href="#s5" aria-label="Slide 5"></a>
-  <a href="#s6" aria-label="Slide 6"></a>
-  <a href="#s7" aria-label="Slide 7"></a>
-  <a href="#s8" aria-label="Slide 8"></a>
-</nav>
+<nav class="rail" id="rail" aria-label="Slide navigation"></nav>
 
 <div class="chrome">
   <a href="index.html">&larr; Workspace</a>
@@ -460,9 +456,18 @@
 <script>
   (function () {
     var deck = document.getElementById('deck');
+    var rail = document.getElementById('rail');
     var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
-    var dots = Array.prototype.slice.call(document.querySelectorAll('.rail a'));
     var current = 0;
+
+    var dots = slides.map(function (slide, i) {
+      var dot = document.createElement('a');
+      dot.href = '#' + slide.id;
+      dot.setAttribute('aria-label', 'Slide ' + (i + 1));
+      if (i === 0) dot.className = 'active';
+      rail.appendChild(dot);
+      return dot;
+    });
 
     function go(index) {
       current = Math.max(0, Math.min(slides.length - 1, index));
@@ -470,10 +475,10 @@
     }
 
     document.addEventListener('keydown', function (event) {
-      if (event.key === 'ArrowRight' || event.key === 'PageDown' || event.key === ' ') {
+      if (event.key === 'ArrowRight' || event.key === 'ArrowDown' || event.key === 'PageDown' || event.key === ' ') {
         event.preventDefault();
         go(current + 1);
-      } else if (event.key === 'ArrowLeft' || event.key === 'PageUp') {
+      } else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp' || event.key === 'PageUp') {
         event.preventDefault();
         go(current - 1);
       } else if (event.key === 'Home') {
