@@ -1,119 +1,118 @@
-# Architecture overview
+# CARDIO4Cities Architecture
 
-A visual version of this document, with diagrams, is served at
-[`/architecture.html`](../frontend/architecture.html).
+A diagrammed version of this overview is served at
+[`/architecture.html`](../frontend/architecture.html)
+(live: <https://cardio4cities-intelligence-studio.onrender.com/architecture.html>).
 
-## The problem, as framed
+## Product boundary
 
-A City Lead needs to walk into a meeting with health officials understanding a
-city they have never researched. The failure mode that matters is not *slow* —
-it is *confidently wrong in the room*: a national statistic quoted as a city one,
-a programme that ended two years ago, a figure nobody can source.
-
-So this is not a summariser. It is a research system whose every output can be
-interrogated, and whose unknowns are part of the product.
+The application creates an evidence-first brief for a city that has not been
+researched before. It researches public sources at request time, separates
+city-level claims from broader context, withholds unsupported claims, and keeps the
+evidence trail for every published fact. What it cannot establish is published as a
+knowledge gap.
 
 ## Major components
 
+| Component | Technology | Role |
+|---|---|---|
+| Orchestration | LangGraph `StateGraph` ([`workflow.py`](../backend/app/workflow.py)) | Ten nodes, one conditional edge that loops back to planning |
+| API and jobs | FastAPI | Starts research as a background job the UI polls; Q&A, report, graph, diagnostics |
+| Frontend | Vanilla JS, no build step | Research progress, evidence, graph, Q&A, runtime tabs |
+| Models | Open-weights models on Groq via an OpenAI-compatible API | Planning, claim extraction, fact checking, answers, graph extraction |
+| Source discovery | **Tavily** web search; OpenAlex, Europe PMC, Wikipedia | Live sources at request time |
+| Datastores | SQLite, Qdrant Cloud, Graphiti on Neo4j Sandbox | Ledger, evidence vectors, knowledge graph |
+| Hosting | Docker on Render (free tier) | One URL serves API and frontend |
+
+## Agent architecture
+
 ```
-Browser ── FastAPI ── LangGraph StateGraph (10 nodes) ── SQLite ledger
-                                │                     ── Qdrant vectors
-                                │                     ── Graphiti → Neo4j
-                                └── public APIs, source websites, LLM provider
+intake → plan → discover → crawl_gate → extract → claim_extraction
+            ↑                                            ↓
+            └────────── sufficiency ←──────────── fact_check
+                             ↓
+                          index → report
 ```
 
-- **Frontend** (`frontend/`) — static workspace: workflow trace, evidence ledger,
-  gap ledger, graph view, Q&A, admin telemetry. No build step.
-- **API** (`backend/app/main.py`, `research.py`) — one FastAPI app serving both
-  the API and the frontend, so there is a single origin to deploy.
-- **Orchestration** (`backend/app/workflow.py`) — the LangGraph graph. Every
-  stage writes a trace event with a status and a duration.
-- **Agents** (`backend/app/agents/`) — one module per responsibility: planner,
-  discovery, crawlability, extraction, claims, factcheck, synthesis.
-- **Knowledge** (`backend/app/storage.py`, `knowledge.py`) — the three stores.
-- **Ontology** (`backend/app/ontology.py`) — the five research dimensions and the
-  typed graph entities. This is the file that defines what the system believes
-  "understanding a city" means.
+| Agent (node) | Responsibility | Consequence |
+|---|---|---|
+| Planner (`plan`) | Writes search queries per area; in round 2, only for areas still empty | |
+| Discovery (`discover`) | Runs every query against every available search provider in parallel, de-duplicates and ranks by publisher authority | A provider returning nothing is recorded as a gap |
+| Crawl gate (`crawl_gate`) | Reads `robots.txt` **before** any fetch | Disallowed sources are never read, and are listed with a reason |
+| Reader (`extract`) | Fetches permitted HTML, XML and PDF within the depth budget | Unreadable pages become gaps |
+| Claim agent (`claim_extraction`) | Proposes claims, each with a quote that must be located in the source text | Unlocatable quotes are dropped |
+| Fact checker (`fact_check`) | A different model rules each claim supported, partially supported, scope-mismatched or unsupported; numbers must appear in the quote | Unsupported claims are withheld and become gaps |
+| Sufficiency (`sufficiency`) | Needs verified city evidence in 3 of 5 areas | Otherwise routes back to the Planner, bounded by depth |
+| Answer agent (`/api/ask`) | Answers from stored evidence only, with citations | Declines when evidence is insufficient |
 
-## AI and agent architecture
+The trust rule: no agent both writes a claim and approves it.
 
-Responsibility is split so that **no agent both produces a claim and approves
-it**, and two stages are gates rather than steps — they remove work from the
-pipeline, and what they remove is recorded.
+## Source discovery
 
-- `claim_extraction` is the only agent allowed to phrase a claim. It is never
-  allowed to decide whether that claim may be published.
-- `fact_check` is the only agent allowed to publish. It never writes claims, has
-  an adversarial prompt, does not see the extractor's reasoning, and can return
-  `UNSUPPORTED`.
-- `sufficiency` measures dimension coverage and owns the decision to spend more
-  research budget or to publish with declared gaps.
+Discovery calls search APIs rather than scraping a search engine. Scraped engines
+serve captchas to non-browser clients, and scraping sits badly next to a crawl gate
+whose job is to respect automated-access rules.
 
-Model failure is centralised in `llm.py`. Callers receive `None` and take a
-deterministic path — they never treat "no model" as "assume the answer". A
-terminal provider error opens a circuit breaker for the rest of the run.
+| Provider | Key | What it contributes |
+|---|---|---|
+| **Tavily** | `TAVILY_API_KEY` | General web search: government, ministry, municipal, NGO and programme pages. Without it, policy and access evidence is thin. |
+| OpenAlex | none | Scholarly works and open-access landing pages |
+| Europe PMC | none | Biomedical literature, open-access full text through its REST API |
+| Wikipedia | none | Background context and links to official bodies |
+| Brave / Serper | optional | Alternatives to Tavily |
+
+Tavily runs one `basic` search per planned query (one credit each): 3 for a Quick
+run, up to 10 for Balanced and up to 12 for Thorough. The key is sent as an
+`Authorization: Bearer` header, never in the request body. Tavily also returns news
+and commercial pages; authority ranking decides what is read first, and the fact
+checker decides what is published. `GET /api/provider-check` makes one real Tavily
+search to confirm the key works.
 
 ## Data architecture
 
-Three stores because three questions have genuinely different shapes.
-
-| | Question | Store |
+| Store | Holds | Why this store |
 |---|---|---|
-| Relational | *What did the system decide, and when?* | SQLite → PostgreSQL |
-| Vector | *What evidence is near this question, in my words?* | Qdrant |
-| Graph | *Who is connected to what, and since when?* | Graphiti → Neo4j |
+| **Relational** (SQLite) | Runs, sources, crawl decisions, facts, verification outcomes, gaps, entities, guardrails, traces, metrics | The audit record needs exact reads and a schema. It answers "what did the system decide, and when?" |
+| **Vector** (Qdrant Cloud) | Verified evidence passages with source URL, claim, quote, scope and verdict | Users ask in their own words, not the source's. Payload-filtered by city |
+| **Graph** (Graphiti on Neo4j Sandbox) | `Organization`, `Programme`, `Policy`, `HealthIndicator`, `Place` and their relationships | "Who runs what" is a traversal. Graphiti's bi-temporal model keeps what was previously true when a city is re-researched |
 
-Forcing all three into one store makes two of them slow and one of them lossy.
-The relational store is the only one that is always available, which is what
-keeps the system inspectable when external providers are not configured.
+Every Qdrant retrieval is filtered by city, and graph search is scoped to the city's
+group, so evidence from one city cannot leak into another city's answer. The Qdrant
+collection is named after the embedding model and dimensions, so vectors from one
+embedder are never queried with another.
 
 ## Retrieval strategy
 
-1. **Scope first.** A question is bound to one researched city before anything is
-   retrieved, so evidence cannot leak between cities.
-2. **Vector and graph concurrently.** Qdrant for semantic recall over evidence
-   passages, `graphiti.search()` for relationship facts in the city's subgraph.
-3. **Ledger fallback** when fewer than three items come back, so retrieval
-   degrades instead of disappearing.
-4. **Synthesis from evidence only**, citing numbered items which the API resolves
-   back to the stored records.
-5. **Refuse cleanly.** No verified match returns an explicit insufficiency
-   response, not an inference.
+1. `POST /api/ask` ties the question to one city.
+2. Qdrant and Graphiti are searched **concurrently at question time**.
+3. Vector and graph hits are merged and de-duplicated (Graphiti reranks its own
+   results by embedding similarity). When fewer than three items come back, the
+   relational ledger fills in, so Q&A still works if a store is unavailable.
+4. The answer agent writes only from the retrieved records, with numbered citations
+   that resolve to stored sources. With too little evidence it says so.
 
-## Key design decisions
+## Trust and safety
 
-1. **Crawlability is a gate, not a filter.** `robots.txt` is read before the first
-   byte is fetched. Refused sources stay visible with their reason so a human can
-   follow them manually.
-2. **Gaps are a first-class output.** Four kinds — withheld, blocked, unreachable,
-   missing — each with a reason and a URL. They are the questions to ask in the room.
-3. **Scope is carried on every fact.** National data is the most likely way this
-   system could mislead, so scope is a field, and national evidence is published
-   only with an explicit warning.
-4. **Discovery uses APIs, not scraped search.** Search engines serve captchas to
-   non-browser clients, and scraping them sits badly beside a crawl-permission gate.
-5. **Provider failure is surfaced, not swallowed.** `/api/runtime` reports real
-   capability; `/api/provider-check` gives a sanitised diagnosis without echoing
-   credentials.
+- No pre-seeded city facts; every run researches live.
+- Crawlability is decided before extraction.
+- Every published fact has a source URL, a located quote and a retrieval time.
+- National or regional evidence is published only with a scope warning.
+- Unsupported claims are withheld and recorded as gaps.
+- Provider errors, guardrail outcomes, durations and counts are stored for audit, and
+  `GET /api/runtime` reports degraded modes, which the UI shows as a banner.
 
-## Trade-offs
+## Key trade-offs
 
-- **SQLite over managed PostgreSQL** — zero setup, portable schema, explicitly not
-  production storage on an ephemeral disk.
-- **Capped research budget** — few queries and fetches per round keeps the
-  end-to-end loop demonstrable. Depth is a tuning problem; the pipeline shape is
-  the hard part.
-- **No human review before storage** — the fact-check gate plus a visible gap
-  ledger buys most of the safety for a fraction of the time.
-- **No PDF extraction** — the largest coverage gap, since many government health
-  reports are PDFs. They are recorded as sources and left for manual review.
-- **No conflict resolution** — disagreeing sources both appear with their quotes.
-- **Free hosting sleeps** — first request after idle is slow.
-
-## Evaluation
-
-The admin view is part of the argument, not a debug panel: source discovery and
-crawl-approval counts, extraction success, evidence coverage, city-scope quality,
-verified versus withheld, dimension coverage, mean confidence, provider errors,
-guardrail outcomes and per-stage durations. A claim about trustworthiness can
-therefore be checked rather than believed.
+- **Free open-weights models:** no cost or lock-in, paid for with rate limits. A
+  throttled call fails over to another model instead of stopping the run.
+- **Search APIs, not scraping:** reliable and sanctioned, paid for with a Tavily
+  credit budget (1,000 free a month) and noisier general-web results.
+- **SQLite on free hosting:** simple and schema-first, but history resets when the
+  Render instance restarts. Vectors and graph live externally and persist. Managed
+  PostgreSQL is the production path.
+- **Neo4j Sandbox:** mandated by the case study; instances expire after 3 days
+  (extendable once to 10), so the graph is rebuilt by re-running research.
+- **Brief first, graph later:** the graph is written in the background so the user
+  never waits for it.
+- **Cut:** human review before storage, contradiction resolution, OCR for scanned
+  PDFs, authentication.

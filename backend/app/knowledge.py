@@ -546,6 +546,30 @@ class KnowledgeLayer:
             )
         return statuses
 
+    @staticmethod
+    async def _check_tavily() -> dict[str, Any]:
+        """One real search, so a revoked or mistyped key shows up before a demo does."""
+        from .agents.discovery import TAVILY_SEARCH_URL, tavily_key
+
+        key = tavily_key()
+        if not key:
+            return {"status": "not_configured", "detail": "Missing: TAVILY_API_KEY. Discovery runs on scholarly sources only."}
+        try:
+            async with httpx.AsyncClient(timeout=20.0) as client:
+                response = await client.post(
+                    TAVILY_SEARCH_URL,
+                    json={"query": "cardiovascular health programme", "max_results": 1, "search_depth": "basic"},
+                    headers={"Authorization": f"Bearer {key}"},
+                )
+            if response.status_code in (401, 403):
+                return {"status": "error", "detail": "Tavily rejected the key. Check TAVILY_API_KEY for typos or stray spaces."}
+            if response.status_code == 432:
+                return {"status": "error", "detail": "Tavily plan credit limit reached."}
+            response.raise_for_status()
+            return {"status": "ok", "detail": "Authenticated. Web search is returning results (1 credit used)."}
+        except Exception as error:
+            return {"status": "error", "error_type": type(error).__name__, "detail": _safe_detail(error)}
+
     async def provider_check(self) -> dict[str, Any]:
         result: dict[str, Any] = {}
 
@@ -590,6 +614,8 @@ class KnowledgeLayer:
                 "detail": "No model configured. Set OPENAI_API_KEY, or LLM_BASE_URL for a local/open-weights model. "
                           "Until then the system runs in extractive mode.",
             }
+
+        result["tavily"] = await self._check_tavily()
 
         result["graphiti"] = (
             {"status": "ok", "detail": "Graph writes and query-time search are enabled."}

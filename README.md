@@ -10,6 +10,18 @@ in the source, has a **separate** agent decide whether each claim may be
 published, and writes what survives into three datastores. What it cannot
 establish is published as a knowledge gap rather than filled in.
 
+**Live application:** <https://cardio4cities-intelligence-studio.onrender.com>
+
+| Page | URL |
+|---|---|
+| Workspace | <https://cardio4cities-intelligence-studio.onrender.com> |
+| Architecture overview | <https://cardio4cities-intelligence-studio.onrender.com/architecture.html> |
+| Presentation deck (8 slides) | <https://cardio4cities-intelligence-studio.onrender.com/presentation.html> |
+| API documentation | <https://cardio4cities-intelligence-studio.onrender.com/docs> |
+
+The free Render instance sleeps when idle, so the first request can take a minute
+to wake it.
+
 ---
 
 ## Quick start
@@ -23,7 +35,9 @@ uvicorn backend.app.main:app --reload
 Open <http://127.0.0.1:8000>, type a city, press **Start research**.
 
 No credentials are required to run it. Every provider is optional and the system
-reports honestly which ones are active — see *Graceful degradation* below.
+reports honestly which ones are active — see *Graceful degradation* below. For a
+brief that covers government and policy pages, add a free `TAVILY_API_KEY`
+(see *Source discovery*).
 
 ---
 
@@ -65,7 +79,7 @@ intake → plan → discover → crawl_gate → extract → claim_extraction
 |---|---|
 | `intake` | Validates the target and declares the guardrails the run is held to. |
 | `plan` | Expands the city into dimension-scoped search queries. |
-| `discover` | Queries public APIs at request time, ranks results by source authority. |
+| `discover` | Queries Tavily web search and scholarly APIs at request time, ranks results by source authority. |
 | `crawl_gate` | Reads `robots.txt` and decides what may be fetched — **before** any fetch. |
 | `extract` | Retrieves permitted pages, reduces them to clean text with a timestamp. |
 | `claim_extraction` | Proposes specific findings, each anchored to a located quote. |
@@ -130,24 +144,46 @@ Two bugs worth naming, because they are the kind that hide:
 Scraping a search engine does not work: the major engines serve captchas or
 query-insensitive pages to non-browser clients, and it sits badly beside a system
 whose second stage exists to respect automated-access rules. Discovery therefore
-runs against providers that publish an API and permit programmatic use.
+runs against providers that publish an API and permit programmatic use. Every
+planned query goes to every available provider in parallel; results are
+de-duplicated and ranked by publisher authority (government and multilateral
+first, then academic).
 
 | Provider | Key | Role |
 |---|---|---|
+| **Tavily** | `TAVILY_API_KEY` | General web search: government, ministry, municipal, NGO and programme pages. Used by the deployment. |
 | **OpenAlex** | none | Scholarly works, open-access landing pages |
 | **Europe PMC** | none | Biomedical literature; open-access full text via its REST API |
 | **Wikipedia** | none | Background context and links to official bodies |
+| **Brave / Serper** | optional | Alternatives to Tavily |
+
+**Why Tavily matters.** The scholarly APIs find city studies but not the city's
+health department, its screening programme or its NCD plan. The recorded
+Hyderabad example ran before Tavily was added: all 46 sources were scholarly, and
+the policy and access areas came back as gaps. Without a web-search key the run
+records that limitation in its gap ledger and the UI.
+
+**Setting up Tavily**
+
+1. Create a free account at <https://app.tavily.com> (1,000 searches a month) and
+   copy the key (`tvly-...`).
+2. Locally, add `TAVILY_API_KEY=tvly-...` to `.env` and restart the server.
+3. On Render, add `TAVILY_API_KEY` under **Environment** and redeploy
+   (`render.yaml` declares it as a dashboard secret).
+4. Check `GET /api/runtime` shows `tavily` as `"available": true`, and
+   `GET /api/provider-check` shows `tavily` as `ok` (it runs one real search).
+
+One `basic` search is made per planned query, one credit each: 3 for a Quick run,
+up to 10 for Balanced, up to 12 for Thorough. The key is sent as an
+`Authorization: Bearer` header, never in the request body, and surrounding
+whitespace is stripped.
 
 Content types read: **HTML**, **XML** (full-text APIs) and **PDF**. PDF support is
 load-bearing rather than incidental — government health strategies and national
 statistics reports are overwhelmingly PDFs, so an HTML-only extractor
-systematically misses the most authoritative city-level evidence available.
-| **Tavily / Brave / Serper** | optional | General web search covering government, ministry and policy pages |
-
-**Configure one keyed provider for a real demonstration.** Without it the brief
-leans academic and under-represents municipal policy — and the run says so, in
-the gap ledger and in the UI. Each provider is independently failure-tolerant and
-retried once on transient upstream errors.
+systematically misses the most authoritative city-level evidence available. Each
+provider is independently failure-tolerant and retried on transient upstream
+errors.
 
 ---
 
@@ -158,7 +194,8 @@ actually do right now, and the UI shows a banner when it is running reduced.
 
 | Missing | Effect |
 |---|---|
-| No `OPENAI_API_KEY`, or quota exhausted | Claim extraction becomes **extractive**: it selects sentences that name the city verbatim rather than writing them, so it still cannot fabricate. Verification becomes rule-based. Graph writing is skipped, because Graphiti needs a model to extract entities. |
+| No language model (`LLM_API_KEY` / `OPENAI_API_KEY`), or quota exhausted | Claim extraction becomes **extractive**: it selects sentences that name the city verbatim rather than writing them, so it still cannot fabricate. Verification becomes rule-based. Graph writing is skipped, because Graphiti needs a model to extract entities. |
+| No web-search key (`TAVILY_API_KEY`) | Discovery uses the scholarly APIs only. Government and policy pages are under-represented, and the run records this as a gap. |
 | No Qdrant | Retrieval falls back to lexical matching over the relational ledger. |
 | No Neo4j / Graphiti | Graph view and graph retrieval are empty and say so. |
 
@@ -180,16 +217,16 @@ EMBEDDING_MODEL=text-embedding-3-small
 QDRANT_URL=https://your-cluster.cloud.qdrant.io
 QDRANT_API_KEY=...
 
-# Graph store — optional; needs OPENAI_API_KEY too
-NEO4J_URI=neo4j+s://your-sandbox.databases.neo4j.io
+# Graph store — optional; needs a language model too.
+# Neo4j Graph Database Sandbox: sandboxes expire after 3 days (extendable to 10)
+NEO4J_URI=bolt://<sandbox-ip>:<port>
 NEO4J_USERNAME=neo4j
 NEO4J_PASSWORD=...
 GRAPHITI_ENABLED=true
 
-# General web search — optional but strongly recommended, pick one
-TAVILY_API_KEY=...
-BRAVE_API_KEY=...
-SERPER_API_KEY=...
+# Web search — strongly recommended. Tavily is what the deployment uses;
+# Brave or Serper are alternatives.
+TAVILY_API_KEY=tvly-...
 
 # Research budget (defaults shown)
 RESEARCH_MAX_ROUNDS=2
@@ -198,8 +235,8 @@ RESEARCH_MAX_FETCHES=10
 RESEARCH_SUFFICIENCY_DIMENSIONS=3
 ```
 
-`GET /api/provider-check` tests every provider and returns a sanitised diagnosis
-without echoing credentials.
+`GET /api/provider-check` tests every provider (Qdrant, Neo4j, the model and
+Tavily) and returns a sanitised diagnosis without echoing credentials.
 
 ---
 
@@ -290,8 +327,12 @@ docker build -t cardio4cities .
 docker run --env-file .env -p 8000:8000 cardio4cities
 ```
 
+The live deployment is <https://cardio4cities-intelligence-studio.onrender.com>.
+
 Render reads `render.yaml` as a Blueprint and serves the API and frontend from
-one URL, binding `$PORT` with `/health` as the health check. The free instance
+one URL, binding `$PORT` with `/health` as the health check. Credentials are set
+in the Render dashboard: `LLM_API_KEY`, `EMBEDDING_API_KEY`, `QDRANT_URL`,
+`QDRANT_API_KEY`, `NEO4J_URI`, `NEO4J_PASSWORD` and `TAVILY_API_KEY`. The free instance
 sleeps when idle and its local disk is ephemeral, so external stores are required
 for anything durable.
 
@@ -315,8 +356,9 @@ cycle the documentation claims.
 
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — system design and trade-offs
 - [frontend/architecture.html](frontend/architecture.html) — architecture overview with diagrams (served at `/architecture.html`)
-- [frontend/presentation.html](frontend/presentation.html) — 11-slide demonstration deck (served at `/presentation.html`)
-- [docs/examples/hyderabad-cardio4cities-brief.html](docs/examples/hyderabad-cardio4cities-brief.html) — a completed city brief
+- [frontend/presentation.html](frontend/presentation.html) — 8-slide demonstration deck (served at `/presentation.html`); notes in [docs/PRESENTATION.md](docs/PRESENTATION.md)
+- [docs/REQUIREMENTS_CHECKLIST.md](docs/REQUIREMENTS_CHECKLIST.md) — each case-study requirement mapped to its implementation
+- [docs/examples/hyderabad-cardio4cities-brief.html](docs/examples/hyderabad-cardio4cities-brief.html) — a completed city brief (recorded before Tavily was configured)
 - [docs/examples/hyderabad-research-run.json](docs/examples/hyderabad-research-run.json) — the full run record behind it
 
 ---

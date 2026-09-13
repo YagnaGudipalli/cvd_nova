@@ -14,9 +14,13 @@ an API and permit programmatic use:
 * **OpenAlex** and **Europe PMC** — peer-reviewed literature, keyless. These are
   where genuinely city-specific health evidence tends to live.
 * **Wikipedia** — keyless context and onward links to official bodies.
-* **Tavily / Brave / Serper** — optional, keyed. General web search covering
-  government, ministry and policy pages. Configure one of these for the widest
-  coverage; the system runs without them at reduced breadth and says so.
+* **Tavily** — keyed, and the web-search provider the deployment runs on. A
+  search API built for agents: it returns clean result snippets for government,
+  ministry, municipal and NGO pages that the scholarly indexes never see.
+* **Brave / Serper** — optional, keyed alternatives to Tavily.
+
+Without any keyed web-search provider the system still runs, at reduced breadth,
+and records that in the gap ledger.
 
 Every provider is independently failure-tolerant: one being down or rate-limited
 degrades breadth, never the run.
@@ -177,13 +181,26 @@ async def _wikipedia(client: httpx.AsyncClient, query: PlannedQuery, city: str) 
     return results[:2]
 
 
+TAVILY_SEARCH_URL = "https://api.tavily.com/search"
+
+
+def tavily_key() -> str | None:
+    # Pasted keys often carry stray whitespace, which Tavily rejects with a 401.
+    return (os.getenv("TAVILY_API_KEY") or "").strip() or None
+
+
 async def _tavily(client: httpx.AsyncClient, query: PlannedQuery, city: str) -> list[dict[str, str]]:
-    key = os.getenv("TAVILY_API_KEY")
+    """General web search: government, municipal and programme pages."""
+    key = tavily_key()
     if not key:
         return []
+    # The key travels in the Authorization header, not the JSON body, so it
+    # never appears in a logged or echoed request payload. One "basic" search
+    # costs one credit.
     response = await client.post(
-        "https://api.tavily.com/search",
-        json={"api_key": key, "query": query.query, "max_results": 6, "search_depth": "basic"},
+        TAVILY_SEARCH_URL,
+        json={"query": query.query, "max_results": 6, "search_depth": "basic", "topic": "general"},
+        headers={"Authorization": f"Bearer {key}"},
     )
     response.raise_for_status()
     return [
@@ -244,7 +261,7 @@ def configured_providers() -> list[dict[str, Any]]:
         {
             "name": name,
             "keyed": keyed,
-            "available": bool(os.getenv(keys[name])) if keyed else True,
+            "available": bool((os.getenv(keys[name]) or "").strip()) if keyed else True,
             "role": "General web search including government and policy pages" if keyed else {
                 "openalex": "Scholarly works, open-access landing pages",
                 "europepmc": "Biomedical literature and open-access full text",
@@ -339,7 +356,7 @@ async def discover(
         notes.append(f"Discovery provider '{name}' returned nothing for this city, so its perspective is missing from this brief.")
     if not any(provider["available"] and provider["keyed"] for provider in configured_providers()):
         notes.append(
-            "No general web-search provider is configured (TAVILY_API_KEY, BRAVE_API_KEY or SERPER_API_KEY), "
+            "No general web-search provider is configured (set TAVILY_API_KEY, or BRAVE_API_KEY / SERPER_API_KEY), "
             "so government and municipal policy pages are under-represented in this run."
         )
 

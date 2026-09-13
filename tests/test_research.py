@@ -532,3 +532,29 @@ def test_app_shell_is_revalidated_on_every_load():
         for path in ("/", "/app.js", "/styles.css"):
             assert client.get(path).headers.get("cache-control") == "no-cache", path
         assert client.get("/health").json()["version"]
+
+
+async def test_tavily_key_is_sent_as_a_bearer_header_and_never_in_the_body(monkeypatch):
+    """Regression: a pasted key with stray whitespace was rejected with a 401,
+    and a key in the JSON body is one logged payload away from leaking."""
+    import json
+
+    import httpx
+
+    from backend.app.agents.discovery import _tavily
+    from backend.app.ontology import PlannedQuery
+
+    monkeypatch.setenv("TAVILY_API_KEY", " tvly-secret\n")
+    seen = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen["authorization"] = request.headers.get("authorization")
+        seen["body"] = json.loads(request.content)
+        return httpx.Response(200, json={"results": [{"title": "Plan", "url": "https://health.gov.example/plan", "content": "text"}]})
+
+    async with httpx.AsyncClient(transport=httpx.MockTransport(handler)) as client:
+        results = await _tavily(client, PlannedQuery(query="Nairobi hypertension", dimension="burden"), "Nairobi")
+
+    assert seen["authorization"] == "Bearer tvly-secret"
+    assert "api_key" not in seen["body"]
+    assert results[0]["url"] == "https://health.gov.example/plan"

@@ -29,6 +29,9 @@ services:
         sync: false
       - key: EMBEDDING_API_KEY
         sync: false
+      # Web search for government, municipal and programme pages.
+      - key: TAVILY_API_KEY
+        sync: false
 
       # --- Generation: Groq, open-weights models ------------------------
       - key: LLM_BASE_URL

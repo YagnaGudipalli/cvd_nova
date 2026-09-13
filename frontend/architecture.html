@@ -296,10 +296,10 @@
         <!-- External -->
         <g>
           <rect x="124" y="536" width="199" height="86" fill="#f5f7f2" stroke="#d8e0dc" stroke-dasharray="4 3" />
-          <text x="138" y="558" font-family="Manrope, sans-serif" font-size="12.5" font-weight="700" fill="#172222">Discovery APIs</text>
-          <text x="138" y="578" font-family="Manrope, sans-serif" font-size="10.5" fill="#687575">OpenAlex, Europe PMC,</text>
-          <text x="138" y="593" font-family="Manrope, sans-serif" font-size="10.5" fill="#687575">Wikipedia (keyless); optional</text>
-          <text x="138" y="608" font-family="Manrope, sans-serif" font-size="10.5" fill="#687575">Tavily / Brave / Serper.</text>
+          <text x="138" y="558" font-family="Manrope, sans-serif" font-size="12.5" font-weight="700" fill="#172222">Search APIs</text>
+          <text x="138" y="578" font-family="Manrope, sans-serif" font-size="10.5" fill="#687575">Tavily web search (keyed);</text>
+          <text x="138" y="593" font-family="Manrope, sans-serif" font-size="10.5" fill="#687575">OpenAlex, Europe PMC,</text>
+          <text x="138" y="608" font-family="Manrope, sans-serif" font-size="10.5" fill="#687575">Wikipedia (keyless).</text>
 
           <rect x="335" y="536" width="199" height="86" fill="#f5f7f2" stroke="#d8e0dc" stroke-dasharray="4 3" />
           <text x="349" y="558" font-family="Manrope, sans-serif" font-size="12.5" font-weight="700" fill="#172222">Source websites</text>
@@ -339,8 +339,8 @@
     <div class="agent">
       <span class="label">02 &middot; Discovery</span>
       <h3>Finds sources</h3>
-      <p>Searches the live web at request time and ranks results by publisher authority.</p>
-      <p><b>Uses</b> OpenAlex, Europe PMC, Wikipedia; optional web search</p>
+      <p>Searches the live web at request time and ranks results by publisher authority. Tavily reaches government, municipal and programme pages; the scholarly APIs reach city studies.</p>
+      <p><b>Uses</b> Tavily web search, OpenAlex, Europe PMC, Wikipedia</p>
     </div>
     <div class="agent gate">
       <span class="label">03 &middot; Crawl gate</span>
@@ -423,7 +423,7 @@
     <span class="label">Chosen, and what it costs</span>
     <ul>
       <li><strong>Free open-weights models:</strong> $0 and no lock-in, paid for with rate limits.</li>
-      <li><strong>Scholarly APIs, no web-search key:</strong> government and policy pages are under-represented.</li>
+      <li><strong>Search APIs, not a scraped search engine:</strong> Tavily plus scholarly APIs are sanctioned and reliable, paid for with a credit budget (one Tavily credit per search: 3 for a Quick run, up to 12 for Thorough; 1,000 free a month). News and commercial pages also come back, so authority ranking and the fact checker have to filter them.</li>
       <li><strong>No human review, no OCR, no authentication:</strong> the fact-check gate and visible gaps carry the safety.</li>
       <li><strong>SQLite on free hosting:</strong> history resets on restart; vectors and graph persist.</li>
     </ul>
