@@ -271,7 +271,7 @@ class LanguageModel:
             return self._chat()
         if self._embed_client is None:
             self._embed_client = AsyncOpenAI(
-                api_key=settings.openai_api_key or "not-required",
+                api_key=settings.embedding_api_key or "not-required",
                 base_url=settings.embedding_base_url,
                 timeout=60.0,
                 max_retries=0,

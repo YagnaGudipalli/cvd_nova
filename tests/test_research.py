@@ -445,3 +445,19 @@ def test_quick_depth_reads_fewer_sources_and_never_starts_a_second_round():
     assert quick.max_fetches_per_round < balanced.max_fetches_per_round < thorough.max_fetches_per_round
     assert get_profile("nonsense").key == "balanced"
     assert get_profile(None).key == "balanced"
+
+
+def test_the_generation_key_is_never_sent_to_a_different_embedding_provider(monkeypatch):
+    from backend.app.config import Settings
+
+    monkeypatch.setenv("LLM_BASE_URL", "https://api.groq.com/openai/v1")
+    monkeypatch.setenv("LLM_API_KEY", "gsk-groq-secret")
+    monkeypatch.setenv("EMBEDDING_PROVIDER", "api")
+    monkeypatch.setenv("EMBEDDING_BASE_URL", "https://embeddings.example.com/v1")
+    monkeypatch.delenv("EMBEDDING_API_KEY", raising=False)
+    settings = Settings()
+    assert settings.embedding_api_key is None
+    assert settings.embeddings_configured is False, "without its own key the hosted embedder is not used"
+
+    monkeypatch.setenv("EMBEDDING_API_KEY", "embed-secret")
+    assert Settings().embedding_api_key == "embed-secret"

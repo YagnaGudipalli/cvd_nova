@@ -1,23 +1,69 @@
+# Render Blueprint for the CARDIO4Cities Intelligence Studio.
+#
+# Free tier: 512 MB RAM. Measured idle memory is 394 MB with the in-process
+# embedding model and 208 MB without it, and a research run adds roughly
+# 50-100 MB, so on this plan embeddings come from a hosted API
+# (EMBEDDING_PROVIDER=api). Without an embedding key the app still runs and
+# falls back to lexical vectors for retrieval, and says so on /api/runtime.
+#
+# Entries marked `sync: false` are credentials: Render asks for them in the
+# dashboard when the Blueprint is applied. Never commit their values.
 services:
   - type: web
     name: cardio4cities-intelligence-studio
     runtime: docker
     plan: free
     healthCheckPath: /health
+    autoDeploy: true
     envVars:
+      # --- Credentials (set in the dashboard) ---------------------------
+      - key: LLM_API_KEY
+        sync: false
       - key: QDRANT_URL
         sync: false
       - key: QDRANT_API_KEY
         sync: false
       - key: NEO4J_URI
         sync: false
-      - key: NEO4J_USERNAME
-        value: neo4j
       - key: NEO4J_PASSWORD
         sync: false
-      - key: NEO4J_DATABASE
-        value: neo4j
-      - key: OPENAI_API_KEY
+      - key: EMBEDDING_API_KEY
         sync: false
+      - key: EMBEDDING_BASE_URL
+        sync: false
+      - key: EMBEDDING_MODEL
+        sync: false
+
+      # --- Generation: Groq, open-weights models ------------------------
+      - key: LLM_BASE_URL
+        value: https://api.groq.com/openai/v1
+      - key: LLM_MODEL
+        value: qwen/qwen3.8-27b
+      - key: LLM_FAST_MODEL
+        value: openai/gpt-oss-20b
+      - key: LLM_EXTRACTION_MODELS
+        value: qwen/qwen3.8-27b,openai/gpt-oss-120b,openai/gpt-oss-20b
+      - key: LLM_MAX_CONCURRENCY
+        value: "2"
+      - key: LLM_DOC_CHARS
+        value: "6000"
+      - key: CHECKER_REASONING_EFFORT
+        value: low
+
+      # --- Knowledge graph ----------------------------------------------
       - key: GRAPHITI_ENABLED
         value: "true"
+      - key: GRAPH_MODEL
+        value: openai/gpt-oss-120b
+      - key: GRAPH_FAST_MODEL
+        value: openai/gpt-oss-20b
+      - key: GRAPH_MAX_EPISODES
+        value: "8"
+      - key: NEO4J_USERNAME
+        value: neo4j
+      - key: NEO4J_DATABASE
+        value: neo4j
+
+      # --- Embeddings: hosted, to stay inside 512 MB --------------------
+      - key: EMBEDDING_PROVIDER
+        value: api

@@ -85,6 +85,11 @@ class Settings:
     #: ``fastembed`` runs a small open embedding model in-process on ONNX: no
     #: server, no key, no GPU, and it works on older macOS where Ollama does not.
     #: ``api`` sends embeddings to EMBEDDING_BASE_URL (or OpenAI).
+    #: Credential for a hosted embedding provider. Kept separate from the chat
+    #: key: when embeddings and generation are different providers, one
+    #: provider's key must never be sent to the other.
+    embedding_api_key_env: str | None = field(default_factory=lambda: os.getenv("EMBEDDING_API_KEY") or None)
+    openai_platform_key: str | None = field(default_factory=lambda: os.getenv("OPENAI_API_KEY") or None)
     embedding_provider: str = field(default_factory=lambda: os.getenv("EMBEDDING_PROVIDER", "fastembed").strip().lower())
     #: Open-weights embedders differ in width (nomic-embed-text is 768,
     #: mxbai-embed-large is 1024). Declaring it keeps the Qdrant collection name
@@ -132,11 +137,23 @@ class Settings:
         return bool(self.openai_api_key or self.llm_base_url)
 
     @property
+    def embedding_api_key(self) -> str | None:
+        """The key sent to the embedding endpoint, and only ever its own."""
+        if self.embedding_api_key_env:
+            return self.embedding_api_key_env
+        if not self.embedding_base_url:
+            return self.openai_platform_key  # OpenAI itself
+        if self.embedding_base_url == self.llm_base_url:
+            return self.openai_api_key  # same provider as generation
+        return None  # a different provider never receives the generation key
+
+    @property
     def embeddings_configured(self) -> bool:
         """Embeddings run independently of the chat model: in-process, or on their own endpoint."""
         if self.embedding_provider == "fastembed":
             return True
-        return bool(self.embedding_base_url or self.openai_api_key)
+        local = bool(self.embedding_base_url and any(host in self.embedding_base_url for host in ("localhost", "127.0.0.1")))
+        return bool(self.embedding_api_key) or local
 
     @property
     def llm_provider(self) -> str:
