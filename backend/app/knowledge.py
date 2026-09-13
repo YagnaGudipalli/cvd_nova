@@ -600,7 +600,9 @@ class KnowledgeLayer:
 
         if settings.llm_configured:
             probe = await language_model.json_call(
-                "Reply with JSON only.", 'Return {"ok": true}', max_tokens=20, purpose="provider-check", tier="fast"
+                # Reasoning models spend tokens before answering; 20 made a healthy
+                # model report as broken.
+                "Reply with JSON only.", 'Return {"ok": true}', max_tokens=300, purpose="provider-check", tier="fast"
             )
             result["llm"] = (
                 {"status": "ok", "model": settings.llm_model, "provider": settings.llm_provider,
