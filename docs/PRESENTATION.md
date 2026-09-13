@@ -1,6 +1,6 @@
 # Demonstration deck
 
-The deck is an interactive 8-slide page served at
+The deck is an interactive 11-slide page served at
 [`/presentation.html`](../frontend/presentation.html).
 
 - Arrow keys, PageUp/PageDown, Home/End to navigate.
@@ -8,29 +8,29 @@ The deck is an interactive 8-slide page served at
 
 ## Slides
 
-Eight slides, following the case study's brief for the deck: the problem as
-understood, the AI solution and architecture, trust and evidence, the user
-experience, and trade-offs and limitations.
+Each content slide is headed by its section title and written as short pointers,
+tables and simple charts. Numbers come from the recorded Nairobi run in
+[`examples/nairobi-research-run.json`](examples/nairobi-research-run.json).
 
-1. **Title** — understand a city before the first meeting; four headline numbers.
-2. **Problem and decomposition** — the failure mode is being confidently wrong in the
-   room; the five dimensions and the exclusion of named individuals.
-3. **Architecture and agents** — ten LangGraph nodes, three gates, the bounded
-   sufficiency cycle, and a checker that is never the extracting model.
-4. **Knowledge management and retrieval** — three stores for three questions,
-   concurrent vector and graph retrieval, cited or declined answers.
-5. **Trust and evidence** — quote grounding, numeric guard, scope flagging, the gap
-   ledger, and degraded runs that say so.
-6. **Engineering decisions** — one table of choices, each with its measured evidence:
-   model per job, deterministic checks first, strict schemas, rate-limit handling,
-   background graph build, sizing to the free host.
-7. **User experience** — depth choice with measured and estimated times, and the path
-   a City Lead walks.
-8. **Trade-offs and limitations** — what was cut, what free tiers cost, what is not
-   modelled, what comes next, and the demo path.
+1. **Title** — who it is for, input and output, four headline numbers.
+2. **The problem, and how it was decomposed** — the confidently-wrong risk; the five
+   dimensions as a table with an example question each.
+3. **Worked example: Nairobi, Kenya** — source-to-fact funnel, facts per dimension,
+   one finding, one gap, and the gap breakdown.
+4. **AI solution and architecture** — the ten-node flow and an agent table with what
+   each did in the Nairobi run.
+5. **Tech stack** — layer, choice and reason.
+6. **Knowledge management and retrieval** — three stores, the question pipeline.
+7. **Trustworthiness and evidence** — guard table, a passing and an illustrative
+   failing claim.
+8. **Evaluation** — run metrics, where the time went, and an honest reading (that run
+   was rules-verified with no LLM available; grounding is not relevance).
+9. **Engineering decisions** — decisions with measured effect.
+10. **User experience** — seven-step journey, depth options, workspace tabs.
+11. **Trade-offs and limitations** — current state, impact, next step; demo path.
 
 Only the Quick depth time (42 s) is measured; Balanced and Thorough are estimates and
-are labelled as such on slide 7.
+are labelled as such on slide 10.
 
 ## Demo path
 
