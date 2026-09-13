@@ -357,6 +357,24 @@ def test_progress_never_moves_backwards_when_a_second_round_starts():
     ACTIVE_PROGRESS.pop("progressville")
 
 
+def test_a_stage_that_runs_again_keeps_each_rounds_result():
+    """Regression: a second round overwrote the first, so a run that re-planned
+    showed only round 2's numbers and the loop was invisible."""
+    import time
+    from backend.app.workflow import _stage
+
+    state = {"round": 1}
+    _stage(state, "Live source discovery", "completed", "Round 1 detail", time.perf_counter(), summary="12 new sources found", found=12)
+    state["round"] = 2
+    _stage(state, "Live source discovery", "warning", "Round 2 detail", time.perf_counter(), found=0)
+
+    assert len(state["workflow"]) == 1
+    step = state["workflow"][0]
+    assert [item["round"] for item in step["rounds"]] == [1, 2]
+    assert step["rounds"][0]["found"] == 12 and step["rounds"][0]["summary"] == "12 new sources found"
+    assert step["status"] == "warning" and step["summary"] == "Round 2 detail"
+
+
 def test_research_returns_immediately_and_reports_the_outcome_by_polling(monkeypatch):
     """Regression: the browser held one request open for a multi-minute run, so
     any interruption lost the result. Starting research must return at once."""

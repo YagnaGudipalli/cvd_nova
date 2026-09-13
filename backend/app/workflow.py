@@ -109,16 +109,24 @@ def _progress(city: str, stage: str, message: str, percent: int, round_number: i
     }
 
 
-def _stage(state: ResearchState, name: str, status: str, detail: str, started: float, **facts: Any) -> None:
-    """Record one workflow stage in both the user-facing list and the trace."""
-    entry = {"name": name, "status": status, "detail": detail, "round": state.get("round", 1), **facts}
+def _stage(state: ResearchState, name: str, status: str, detail: str, started: float, summary: str = "", **facts: Any) -> None:
+    """Record one workflow stage in both the user-facing list and the trace.
+
+    A stage that runs again in a follow-up round keeps one entry in the list,
+    but each round's result is kept under ``rounds``. Overwriting it instead hid
+    the first round entirely, so a run that looped looked as if it had not.
+    ``summary`` is the short plain-language line shown in the list; ``detail``
+    keeps the full technical account.
+    """
+    round_number = state.get("round", 1)
+    record = {"round": round_number, "status": status, "summary": summary or detail, "detail": detail, **facts}
     steps: list[dict[str, Any]] = state.setdefault("workflow", [])
-    for existing in steps:
-        if existing["name"] == name:
-            existing.update(entry)
-            break
-    else:
+    entry = next((existing for existing in steps if existing["name"] == name), None)
+    if entry is None:
+        entry = {"name": name}
         steps.append(entry)
+    history = [item for item in entry.get("rounds", []) if item["round"] != round_number] + [record]
+    entry.update(record, rounds=history)
     state.setdefault("trace", []).append(
         {
             "timestamp": _now(),
@@ -187,7 +195,12 @@ async def intake_node(state: ResearchState) -> dict[str, Any]:
     _guardrail(state, "Fabrication guard", "passed", "Figures absent from the quoted evidence are rejected automatically.")
     _guardrail(state, "Named individuals", "passed", "The extractor is instructed never to characterise a person's views or intentions.")
 
-    _stage(state, "Intake and guardrails", "completed", f"{len(state.get('guardrails', []))} guardrails evaluated for {city}.", started)
+    _stage(
+        state, "Intake and guardrails", "completed" if country else "warning",
+        f"{len(state.get('guardrails', []))} guardrails evaluated for {city}.", started,
+        summary=f"{city} accepted; {len(state.get('guardrails', []))} rules set for the run"
+        + ("" if country else ". No country given, so the city name may be ambiguous"),
+    )
     return {
         "guardrails": state.get("guardrails", []),
         "workflow": state.get("workflow", []),
@@ -222,6 +235,7 @@ async def plan_node(state: ResearchState) -> dict[str, Any]:
         "completed",
         f"Round {round_number}: {len(plan)} queries planned by {planner} across {covered}.",
         started,
+        summary=f"{len(plan)} searches planned" + (f" for the {len(dimensions)} areas still missing" if round_number > 1 else f" across {len(dimensions)} areas"),
         queries=[{"dimension": item.dimension, "query": item.query, "rationale": item.rationale} for item in plan],
     )
     return {"query_plan": plan, "planner": planner, "workflow": state["workflow"], "trace": state["trace"]}
@@ -252,6 +266,7 @@ async def discover_node(state: ResearchState) -> dict[str, Any]:
         "completed" if fresh else "warning",
         f"Round {state.get('round', 1)}: {len(fresh)} new candidate sources ({', '.join(f'{count} {label}' for label, count in sorted(by_authority.items())) or 'none'}).",
         started,
+        summary=f"{len(fresh)} new sources found" if fresh else "No new sources found",
         authority_mix=by_authority,
     )
     return {"sources": sources, "gaps": gaps, "workflow": state["workflow"], "trace": state["trace"]}
@@ -286,7 +301,8 @@ async def crawl_gate_node(state: ResearchState) -> dict[str, Any]:
         "completed",
         f"{len(pending)} sources assessed before any fetch: {len(pending) - len(blocked)} permitted, {len(blocked)} refused and left uncrawled.",
         started,
-        approved=len(allowed),
+        summary=f"{len(pending) - len(blocked)} sites allow reading, {len(blocked)} refused",
+        permitted=len(pending) - len(blocked),
         blocked=len(blocked),
     )
     return {"sources": state["sources"], "gaps": gaps, "workflow": state["workflow"], "trace": state["trace"]}
@@ -328,7 +344,12 @@ async def extract_node(state: ResearchState) -> dict[str, Any]:
         "completed" if documents else "warning",
         f"{len(documents)} pages read and preserved with their retrieval timestamps; {len(failures)} could not be read.",
         started,
+        summary=f"{len(documents)} pages read" + (f", {len(failures)} failed to load" if failures else ""),
         characters=sum(len(document.text) for document in documents),
+        read=len(documents),
+        failed=len(failures),
+        budget=fetch_budget,
+        waiting=max(0, len(queue) - fetch_budget),
     )
     return {
         "documents": state.get("documents", []) + documents,
@@ -395,7 +416,10 @@ async def claim_node(state: ResearchState) -> dict[str, Any]:
         "completed" if candidates else "warning",
         f"{len(candidates)} candidate findings proposed by {extractor}; {ungrounded} discarded for citing wording absent from the source.",
         started,
+        summary=f"{len(candidates)} possible findings pulled out" + (f", {ungrounded} discarded for misquoting" if ungrounded else ""),
+        candidates=len(candidates),
         ungrounded=ungrounded,
+        extractor=extractor,
     )
     return {
         "candidates": state.get("candidates", []) + candidates,
@@ -473,8 +497,13 @@ async def fact_check_node(state: ResearchState) -> dict[str, Any]:
         f"{withheld} withheld as unsupported. Brief now holds {len(facts)} findings, {flagged} carrying a scope warning; "
         f"{by_model} checked by the model, {by_rules} by rules.",
         started,
+        summary=f"{len(facts) - published_before} of {len(pending)} passed, {withheld} withheld",
+        checked=len(pending),
+        published=len(facts) - published_before,
         withheld=withheld,
         scope_flagged=flagged,
+        checked_by_model=by_model,
+        checked_by_rules=by_rules,
     )
     return {
         "facts": facts,
@@ -519,7 +548,17 @@ async def sufficiency_node(state: ResearchState) -> dict[str, Any]:
             for key in uncovered
         )
 
-    _stage(state, "Sufficiency review", "completed", detail, started, covered=covered, uncovered=uncovered, decision=decision)
+    outcome = (
+        "searching again" if decision == "continue"
+        else "enough to publish" if len(covered) >= settings.sufficiency_threshold
+        else "out of rounds, publishing with gaps"
+    )
+    _stage(
+        state, "Sufficiency review", "completed", detail, started,
+        summary=f"{len(covered)} of {len(DIMENSION_KEYS)} areas covered: {outcome}",
+        covered=covered, uncovered=uncovered, decision=decision,
+        threshold=settings.sufficiency_threshold, total=len(DIMENSION_KEYS),
+    )
     return {
         "decision": decision,
         "gaps": gaps,
@@ -541,12 +580,14 @@ async def index_node(state: ResearchState) -> dict[str, Any]:
         city, state.get("country"), facts, len(state.get("sources", [])),
         on_graph_finish=research_store.update_graph_status,
     )
+    degraded = any(store.get("status") in {"error", "degraded"} for store in stores.values())
     _stage(
         state,
         "Knowledge indexing",
-        "completed" if not any(store.get("status") in {"error", "degraded"} for store in stores.values()) else "warning",
+        "warning" if degraded else "completed",
         " ".join(store.get("detail", "") for store in stores.values()).strip(),
         started,
+        summary=f"{len(facts)} findings saved" + ("; a store had a problem" if degraded else ""),
         stores=stores,
     )
     return {"stores": stores, "workflow": state["workflow"], "trace": state["trace"]}
@@ -603,6 +644,7 @@ async def report_node(state: ResearchState) -> dict[str, Any]:
         "completed",
         f"{len(facts)} verified findings, {len(gaps)} declared gaps, {len(covered)} of {len(DIMENSION_KEYS)} dimensions covered.",
         started,
+        summary=f"Brief ready: {len(facts)} findings, {len(gaps)} open questions",
     )
     _progress(city, "Ready", "Your city brief is ready to explore.", 100)
     return {

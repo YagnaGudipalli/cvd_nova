@@ -148,3 +148,18 @@ h2 { font-size: clamp(1.7rem, 3vw, 2.8rem); letter-spacing: -1px; margin-bottom:
 .depth-option input:focus-visible + span { outline: 2px solid var(--green); outline-offset: 2px; }
 .depth-tag { text-transform: capitalize; }
 @media (max-width: 760px) { .depth-options { grid-template-columns: 1fr; } }
+
+/* Overview steps: plain titles grouped by phase, technical name as secondary text */
+.workflow-phase { padding: 16px 0 4px; color: var(--green); font: 500 10px 'DM Mono', monospace; text-transform: uppercase; border-bottom: 1px solid var(--line); }
+.step-technical { display: block; margin-top: 2px; color: var(--muted); font: 10px 'DM Mono', monospace; }
+.step-marker.warning { background: #fff0d0; color: #9b6f00; }
+.step-badges { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+.step-state.warning { color: #9b6f00; }
+.output-title { font-size: 18px; margin: 0 0 6px; }
+.output-why { color: var(--muted); font-size: 13px; line-height: 1.5; margin: 0 0 14px; }
+.round-list { margin-top: 16px; border-top: 1px solid var(--line); }
+.round-list > div:not(.chart-title) { display: grid; grid-template-columns: 70px 1fr; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--line); }
+.round-list span { font: 500 10px 'DM Mono', monospace; text-transform: uppercase; color: var(--green); }
+.round-list p { margin: 0; font-size: 12px; line-height: 1.45; }
+.step-technical-detail { margin-top: 14px; color: var(--muted); font-size: 12px; line-height: 1.5; }
+.step-technical-detail summary { cursor: pointer; font: 500 10px 'DM Mono', monospace; text-transform: uppercase; }

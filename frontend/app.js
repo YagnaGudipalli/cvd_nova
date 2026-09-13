@@ -8,7 +8,7 @@
 
 const API_BASE = window.CARDIO_API_BASE || "";
 // Must match backend/app/version.py and the ?v= on this file in index.html.
-const APP_VERSION = "2.1.0";
+const APP_VERSION = "2.2.0";
 const $ = (selector) => document.querySelector(selector);
 
 let researchResult = null;
@@ -84,14 +84,37 @@ function renderRuntimeDetail(runtime) {
 /* Workflow                                                            */
 /* ------------------------------------------------------------------ */
 
+// Plain-language framing for each stage, keyed by the name the backend records.
+// The technical name stays visible as secondary text so the two can be matched.
+const STEP_GUIDE = {
+  "Intake and guardrails": { title: "Check the request", phase: "Plan", why: "Confirms the place is real and fixes the rules the run must follow, before anything touches the internet." },
+  "Research planning": { title: "Decide what to search for", phase: "Plan", why: "Turns the city into searches across the five areas of city health. A second round only targets the areas still missing." },
+  "Live source discovery": { title: "Find sources", phase: "Gather", why: "Searches the live web and ranks what it finds by how trustworthy the publisher is." },
+  "Crawlability gate": { title: "Ask permission", phase: "Gather", why: "Reads each site's robots.txt first. Sites that refuse automated access are never fetched." },
+  "Evidence extraction": { title: "Read the pages", phase: "Gather", why: "Downloads the permitted pages, best sources first and within the depth you chose, and keeps clean text with a timestamp." },
+  "Claim extraction": { title: "Pull out findings", phase: "Verify", why: "Proposes specific statements with an exact quote. A quote that cannot be found in the page is discarded, which stops invented citations." },
+  "Independent fact check": { title: "Double-check each finding", phase: "Verify", why: "A separate checker, which wrote none of the findings, decides what is supported, what needs a scope warning and what is withheld." },
+  "Sufficiency review": { title: "Is it enough?", phase: "Verify", why: "Counts the areas with a verified city-level finding. Too few, and the run searches again for the missing ones, up to the round limit." },
+  "Knowledge indexing": { title: "Save", phase: "Publish", why: "Stores the verified findings so they can be searched, questioned and explored as a graph." },
+  "Brief assembly": { title: "Build the brief", phase: "Publish", why: "Puts the findings, the open questions and the quality measures together." }
+};
+const guideFor = (step) => STEP_GUIDE[step.name] || { title: step.name, phase: "", why: "" };
+
 function renderWorkflow(steps = []) {
-  $("#step-count").textContent = `${steps.length} stages`;
-  $("#workflow").innerHTML = steps.map((step, index) => `
+  $("#step-count").textContent = `${steps.length} steps`;
+  let phase = null;
+  $("#workflow").innerHTML = steps.map((step, index) => {
+    const guide = guideFor(step);
+    const rounds = step.rounds?.length || 1;
+    const heading = guide.phase && guide.phase !== phase ? `<div class="workflow-phase">${esc(guide.phase)}</div>` : "";
+    phase = guide.phase || phase;
+    return `${heading}
     <button class="workflow-step ${index === selectedStep ? "selected" : ""}" data-step-index="${index}" type="button">
-      <div class="step-marker ${esc(step.status)}">${step.status === "completed" ? "✓" : step.status === "warning" ? "!" : index + 1}</div>
-      <div><strong>${esc(step.name)}</strong><p>${esc(step.detail)}</p></div>
-      <span class="step-state">${esc(step.status)}</span>
-    </button>`).join("");
+      <div class="step-marker ${esc(step.status)}">${index + 1}</div>
+      <div><strong>${esc(guide.title)}</strong><small class="step-technical">${esc(step.name)}</small><p>${esc(step.summary || step.detail)}</p></div>
+      <span class="step-badges">${step.status === "warning" ? `<span class="step-state warning">Needs a look</span>` : ""}${rounds > 1 ? `<span class="step-state">${rounds} rounds</span>` : ""}</span>
+    </button>`;
+  }).join("");
   document.querySelectorAll(".workflow-step").forEach((button) => {
     button.addEventListener("click", () => {
       selectedStep = Number(button.dataset.stepIndex);
@@ -110,6 +133,16 @@ function renderStepOutput() {
   const { sources = [], facts = [], gaps = [], metrics = {} } = researchResult;
   const approved = sources.filter((source) => source.crawl_allowed);
   const refused = sources.filter((source) => source.crawl_allowed === false);
+  const rounds = step.rounds || [step];
+  // Runs saved before per-round records existed only carry the last round's fields.
+  const sum = (field) => rounds.reduce((total, item) => total + (Number(item[field]) || 0), 0);
+  const recorded = (field) => rounds.some((item) => item[field] !== undefined);
+  const authorityMix = {};
+  rounds.forEach((item) => Object.entries(item.authority_mix || {}).forEach(([label, count]) => {
+    authorityMix[label] = (authorityMix[label] || 0) + count;
+  }));
+  const threshold = step.threshold ?? 3;
+  const dimensionsTotal = step.total ?? metrics.dimensions_total ?? 5;
 
   const views = {
     "Intake and guardrails": () => ({
@@ -119,14 +152,14 @@ function renderStepOutput() {
     }),
     "Research planning": () => ({
       intro: `Planned by ${esc(researchResult.planner)}.`,
-      cards: [card("Queries", step.queries?.length || 0), card("Planner", researchResult.planner.split(":")[0]), card("Dimensions", metrics.dimensions_total || 5)],
-      body: step.queries?.length
-        ? `<div class="decision-list">${step.queries.map((query) => `<div><span>${esc(query.query)}</span><strong>${esc(query.dimension)}</strong></div>`).join("")}</div>`
+      cards: [card("Searches", rounds.reduce((total, item) => total + (item.queries?.length || 0), 0)), card("Planner", researchResult.planner.split(":")[0]), card("Areas", dimensionsTotal)],
+      body: rounds.some((item) => item.queries?.length)
+        ? rounds.map((item) => `${rounds.length > 1 ? `<div class="chart-title">Round ${item.round}</div>` : ""}<div class="decision-list">${(item.queries || []).map((query) => `<div><span>${esc(query.query)}</span><strong>${esc(query.dimension)}</strong></div>`).join("")}</div>`).join("")
         : `<p class="empty">No queries recorded.</p>`
     }),
     "Live source discovery": () => ({
-      intro: "Sources found on the public internet at request time.",
-      cards: [card("Discovered", sources.length), card("Government", sources.filter((s) => /\.gov|\.go\.|who\.int/.test(s.url)).length), card("Academic", sources.filter((s) => /doi|pmc|lancet|bmc|springer/.test(s.url)).length)],
+      intro: "Sources found on the public internet at request time, grouped by the kind of publisher.",
+      cards: [card("Discovered", sources.length), ...Object.entries(authorityMix).sort((a, b) => b[1] - a[1]).slice(0, 2).map(([label, count]) => card(label, count))],
       body: `<div class="source-list">${sources.slice(0, 8).map((source) => `<a href="${esc(source.url)}" target="_blank" rel="noreferrer"><strong>${esc(source.title)}</strong><span>${esc(source.discovered_via)}</span></a>`).join("")}</div>`
     }),
     "Crawlability gate": () => ({
@@ -136,12 +169,12 @@ function renderStepOutput() {
     }),
     "Evidence extraction": () => ({
       intro: "Permitted pages retrieved and reduced to clean text with a retrieval timestamp.",
-      cards: [card("Pages read", metrics.sources_extracted || 0, "good"), card("Unreadable", gaps.filter((gap) => gap.kind === "unreachable").length, "caution"), card("Budget", `${approved.length} permitted`)],
-      body: `<p>Full text is kept only long enough to locate quotes; what persists is the quote, the URL and the timestamp.</p>`
+      cards: [card("Pages read", metrics.sources_extracted || 0, "good"), card("Unreadable", gaps.filter((gap) => gap.kind === "unreachable").length, gaps.some((gap) => gap.kind === "unreachable") ? "caution" : ""), card("Reading limit", recorded("budget") ? `${sum("budget")} of ${approved.length} permitted` : (researchResult.profile?.max_sources ? `${researchResult.profile.max_sources} max` : "not recorded"))],
+      body: `<p>Full text is kept only long enough to locate quotes; what persists is the quote, the URL and the timestamp.${recorded("waiting") && sum("waiting") ? ` ${sum("waiting")} permitted pages were left unread because of the depth you chose.` : ""}</p>`
     }),
     "Claim extraction": () => ({
       intro: "Specific statements proposed, each anchored to wording located in its source.",
-      cards: [card("Candidates", metrics.candidate_claims || 0), card("Ungrounded dropped", step.ungrounded || 0, step.ungrounded ? "caution" : "good"), card("Extractor", (facts[0]?.verified_by || "").split(":")[0] || "n/a")],
+      cards: [card("Candidates", metrics.candidate_claims || 0), card("Ungrounded dropped", sum("ungrounded"), sum("ungrounded") ? "caution" : "good"), card("Extractor", (step.extractor || "not recorded").split(":")[0])],
       body: `<p>A proposed quote that cannot be found in the source document is discarded before verification. That is the mechanical guard against a fabricated citation.</p>`
     }),
     "Independent fact check": () => ({
@@ -151,7 +184,7 @@ function renderStepOutput() {
     }),
     "Sufficiency review": () => ({
       intro: "Coverage is measured against the five research dimensions, then the run either publishes or plans another round.",
-      cards: [card("Covered", `${metrics.dimensions_covered || 0} / ${metrics.dimensions_total || 5}`, (metrics.dimensions_covered || 0) >= 3 ? "good" : "caution"), card("Decision", step.decision || "finalise"), card("Rounds", researchResult.rounds)],
+      cards: [card("Covered", `${metrics.dimensions_covered || 0} / ${dimensionsTotal}`, (metrics.dimensions_covered || 0) >= threshold ? "good" : "caution"), card("Needed to publish", `${threshold} areas`), card("Rounds", researchResult.rounds)],
       body: renderCoverageBars()
     }),
     "Knowledge indexing": () => ({
@@ -168,9 +201,16 @@ function renderStepOutput() {
   };
 
   const view = (views[step.name] || (() => ({ intro: step.detail, cards: [], body: "" })))();
-  $("#output-label").textContent = `${selectedStep + 1} / ${researchResult.workflow.length}`;
+  const guide = guideFor(step);
+  const roundList = rounds.length > 1
+    ? `<div class="round-list"><div class="chart-title">Round by round</div>${rounds.map((item) => `
+        <div><span>Round ${esc(item.round)}</span><p>${esc(item.summary || item.detail)}</p></div>`).join("")}</div>`
+    : "";
+  const technical = `<details class="step-technical-detail"><summary>Technical detail</summary>${rounds.map((item) => `<p>${esc(item.detail)}</p>`).join("")}</details>`;
+  $("#output-label").textContent = `Step ${selectedStep + 1} of ${researchResult.workflow.length}${guide.phase ? ` · ${guide.phase}` : ""}`;
   $("#step-output").innerHTML =
-    `<p class="output-intro">${esc(view.intro)}</p><div class="output-cards">${view.cards.join("")}</div><div class="output-body">${view.body}</div>`;
+    `<h3 class="output-title">${esc(guide.title)}</h3>${guide.why ? `<p class="output-why">${esc(guide.why)}</p>` : ""}` +
+    `<p class="output-intro">${esc(view.intro)}</p><div class="output-cards">${view.cards.join("")}</div><div class="output-body">${view.body}</div>${roundList}${technical}`;
   $("#guardrails").innerHTML = step.name === "Intake and guardrails" ? guardrailsHtml(researchResult.guardrails || []) : "";
 }
 
