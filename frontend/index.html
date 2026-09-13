@@ -14,7 +14,7 @@
           <p class="eyebrow">CARDIO4Cities / field intelligence</p>
           <h1>City intelligence workspace</h1>
         </div>
-        <span class="status-pill"><span class="status-dot"></span> Live research</span>
+        <span class="status-pill"><span class="status-dot"></span> Live research · <a href="architecture.html">Architecture</a> · <a href="presentation.html">Deck</a></span>
       </header>
 
       <section class="hero-grid">
@@ -31,6 +31,11 @@
               <input id="country" name="country" placeholder="e.g. Kenya" />
             </label>
             <button type="submit"><span>Start research</span><span aria-hidden="true">↗</span></button>
+            <fieldset id="depth-options" class="depth-options">
+              <legend>Research depth <span class="optional">speed versus thoroughness</span></legend>
+              <!-- Filled from /api/profiles so the options and their costs cannot drift from the server. -->
+              <label class="depth-option"><input type="radio" name="depth" value="balanced" checked /><span><strong>Balanced</strong><em>about 2-4 minutes</em></span></label>
+            </fieldset>
           </form>
           <div id="search-progress" class="search-progress hidden" aria-live="polite"><div class="progress-top"><span id="progress-stage">Preparing research</span><strong id="progress-percent">0%</strong></div><div class="progress-track"><span id="progress-bar"></span></div><p id="progress-message">We will keep you updated as the brief is assembled.</p></div>
           <p id="error" class="error" role="alert"></p>

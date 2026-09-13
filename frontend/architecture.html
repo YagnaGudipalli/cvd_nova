@@ -1,0 +1,473 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CARDIO4Cities Architecture Overview</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap');
+
+    :root {
+      --ink: #172222;
+      --muted: #687575;
+      --line: #d8e0dc;
+      --paper: #f5f7f2;
+      --mint: #d8f3df;
+      --green: #1b7654;
+      --coral: #ed765c;
+      --yellow: #f6d778;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: radial-gradient(circle at 92% 4%, #e4f2e4 0, transparent 30%), var(--paper);
+      color: var(--ink);
+      font-family: Manrope, system-ui, sans-serif;
+      line-height: 1.6;
+    }
+
+    .page { max-width: 1080px; margin: 0 auto; padding: 22px 5vw 96px; }
+
+    .masthead {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 20px;
+    }
+
+    .eyebrow, .label, .mono { font: 500 11px 'DM Mono', monospace; letter-spacing: 0; text-transform: uppercase; }
+    .eyebrow { color: var(--green); }
+    .back { color: var(--green); text-decoration: none; font: 500 11px 'DM Mono', monospace; text-transform: uppercase; }
+    .back:hover { color: var(--ink); }
+
+    h1 {
+      font-size: clamp(2.2rem, 5vw, 3.6rem);
+      line-height: 1.02;
+      letter-spacing: -2px;
+      max-width: 16ch;
+      margin: 56px 0 20px;
+    }
+
+    h2 {
+      font-size: clamp(1.4rem, 2.4vw, 1.9rem);
+      letter-spacing: -.6px;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 10px;
+      margin: 64px 0 8px;
+    }
+
+    h3 { font-size: 1rem; margin: 0 0 6px; }
+
+    .lede { color: var(--muted); font-size: 1.1rem; max-width: 60ch; margin: 0 0 18px; }
+    .section-note { color: var(--muted); font-size: .9rem; max-width: 68ch; margin: 14px 0 24px; }
+    p { margin: 0 0 14px; }
+
+    .runline {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .runline span {
+      border: 1px solid var(--line);
+      background: #fff;
+      padding: 7px 10px;
+      font: 500 10px 'DM Mono', monospace;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    figure { margin: 0 0 8px; }
+    .figure-frame {
+      border: 1px solid var(--line);
+      background: #fff;
+      padding: 18px;
+      overflow-x: auto;
+    }
+    .figure-frame svg { display: block; width: 100%; min-width: 620px; height: auto; }
+    figcaption { color: var(--muted); font: 500 10px 'DM Mono', monospace; text-transform: uppercase; margin-top: 10px; }
+
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 20px 0; }
+    .grid-2 { grid-template-columns: repeat(2, 1fr); }
+    .card { border: 1px solid var(--line); border-top: 3px solid var(--green); background: #fff; padding: 16px; }
+    .card .label { display: block; color: var(--green); margin-bottom: 10px; }
+    .card p { color: var(--muted); font-size: .88rem; line-height: 1.55; margin: 0; }
+    .card p + p { margin-top: 10px; }
+
+    table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: .88rem; }
+    th, td { text-align: left; vertical-align: top; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+    th { font: 500 10px 'DM Mono', monospace; text-transform: uppercase; color: var(--green); background: #fff; }
+    td strong { display: block; margin-bottom: 4px; }
+    td { color: var(--muted); }
+    .table-wrap { overflow-x: auto; }
+
+    .callout {
+      border-left: 4px solid var(--coral);
+      background: #fff;
+      padding: 16px 20px;
+      margin: 24px 0;
+      font-size: .95rem;
+    }
+    .callout strong { color: var(--ink); }
+
+    ol.steps { counter-reset: step; list-style: none; padding: 0; margin: 20px 0; }
+    ol.steps li {
+      counter-increment: step;
+      display: grid;
+      grid-template-columns: 34px 1fr;
+      gap: 14px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--line);
+      font-size: .92rem;
+      color: var(--muted);
+    }
+    ol.steps li::before {
+      content: counter(step, decimal-leading-zero);
+      display: grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+      background: var(--mint);
+      color: var(--green);
+      font: 500 11px 'DM Mono', monospace;
+    }
+    ol.steps li strong { color: var(--ink); }
+
+    ul.plain { padding-left: 18px; margin: 16px 0; color: var(--muted); font-size: .92rem; }
+    ul.plain li { margin-bottom: 10px; }
+    ul.plain strong { color: var(--ink); }
+
+    .honest {
+      border: 1px solid #eedb9b;
+      background: #fffbef;
+      padding: 18px 20px;
+      margin: 24px 0;
+    }
+    .honest .label { color: #946b00; display: block; margin-bottom: 10px; }
+    .honest ul { padding-left: 18px; margin: 0; color: var(--muted); font-size: .9rem; }
+    .honest li { margin-bottom: 8px; }
+    .honest strong { color: var(--ink); }
+
+    footer { border-top: 1px solid var(--line); margin-top: 64px; padding-top: 18px; color: var(--muted); font: 500 10px 'DM Mono', monospace; text-transform: uppercase; }
+
+    @media (max-width: 760px) {
+      .grid, .grid-2 { grid-template-columns: 1fr; }
+      .masthead { align-items: flex-start; flex-direction: column; gap: 10px; }
+      h1 { margin-top: 36px; }
+    }
+  </style>
+</head>
+<body>
+<main class="page">
+
+  <header class="masthead">
+    <span class="eyebrow">CARDIO4Cities / architecture overview</span>
+    <a class="back" href="index.html">Back to workspace &rarr;</a>
+  </header>
+
+  <h1>Evidence before confidence.</h1>
+  <p class="lede">A city research workspace that turns live public sources into a source-traceable brief &mdash; and refuses to publish anything it cannot quote.</p>
+  <div class="runline">
+    <span>FastAPI</span><span>LangGraph</span><span>SQLite ledger</span><span>Qdrant</span><span>Graphiti + Neo4j Sandbox</span><span>Static frontend</span>
+  </div>
+
+  <h2>System context</h2>
+  <p class="section-note">One deployed service. The frontend, the orchestration graph and the API share a process; all durable knowledge lives outside it, because the free hosting tier has ephemeral disk and sleeps when idle.</p>
+
+  <figure>
+    <div class="figure-frame">
+      <svg viewBox="0 0 980 566" role="img" aria-label="Layered system diagram: browser UI, FastAPI endpoints, LangGraph orchestration, three datastores, and external services.">
+        <defs>
+          <marker id="arw" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+            <path d="M0 0 L9 4.5 L0 9 z" fill="#1b7654" />
+          </marker>
+        </defs>
+        <g font-family="'DM Mono', monospace" font-size="10" fill="#687575" text-anchor="end">
+          <text x="108" y="45">PRESENTATION</text>
+          <text x="108" y="128">API</text>
+          <text x="108" y="248">ORCHESTRATION</text>
+          <text x="108" y="380">STATE</text>
+          <text x="108" y="500">EXTERNAL</text>
+        </g>
+
+        <!-- Presentation -->
+        <rect x="124" y="16" width="836" height="50" fill="#ffffff" stroke="#d8e0dc" />
+        <text x="144" y="38" font-family="Manrope, sans-serif" font-size="14" font-weight="700" fill="#172222">Intelligence Studio UI</text>
+        <text x="144" y="56" font-family="Manrope, sans-serif" font-size="12" fill="#687575">Workflow trace &middot; evidence ledger &middot; knowledge gaps &middot; graph view &middot; Q&amp;A &middot; report download</text>
+
+        <line x1="542" y1="66" x2="542" y2="92" stroke="#1b7654" stroke-width="1.5" marker-end="url(#arw)" />
+
+        <!-- API -->
+        <rect x="124" y="98" width="836" height="76" fill="#ffffff" stroke="#d8e0dc" />
+        <text x="144" y="120" font-family="Manrope, sans-serif" font-size="13" font-weight="700" fill="#172222">FastAPI application</text>
+        <g font-family="'DM Mono', monospace" font-size="9.5" fill="#1b7654">
+          <rect x="140" y="130" width="150" height="28" fill="#d8f3df" />
+          <text x="150" y="148">POST /api/research</text>
+          <rect x="300" y="130" width="150" height="28" fill="#d8f3df" />
+          <text x="310" y="148">POST /api/ask</text>
+          <rect x="460" y="130" width="150" height="28" fill="#d8f3df" />
+          <text x="470" y="148">GET /api/report</text>
+          <rect x="620" y="130" width="150" height="28" fill="#d8f3df" />
+          <text x="630" y="148">GET /api/graph</text>
+          <rect x="780" y="130" width="164" height="28" fill="#d8f3df" />
+          <text x="790" y="148">GET /api/stores</text>
+        </g>
+
+        <line x1="542" y1="174" x2="542" y2="200" stroke="#1b7654" stroke-width="1.5" marker-end="url(#arw)" />
+
+        <!-- Orchestration -->
+        <rect x="124" y="206" width="836" height="96" fill="#ffffff" stroke="#172222" stroke-width="1.5" />
+        <text x="144" y="228" font-family="Manrope, sans-serif" font-size="13" font-weight="700" fill="#172222">LangGraph StateGraph</text>
+        <text x="144" y="245" font-family="Manrope, sans-serif" font-size="11.5" fill="#687575">Compiled at import time. Every stage writes a trace event with a status and a duration.</text>
+        <g font-family="'DM Mono', monospace" font-size="9" fill="#172222">
+          <rect x="140" y="258" width="118" height="30" fill="#f5f7f2" stroke="#d8e0dc" />
+          <text x="150" y="277">intake &rarr; plan</text>
+          <rect x="270" y="258" width="118" height="30" fill="#f5f7f2" stroke="#d8e0dc" />
+          <text x="280" y="277">discovery</text>
+          <rect x="400" y="258" width="118" height="30" fill="#fff0d0" stroke="#eedb9b" />
+          <text x="410" y="277">crawl gate</text>
+          <rect x="530" y="258" width="118" height="30" fill="#f5f7f2" stroke="#d8e0dc" />
+          <text x="540" y="277">extraction</text>
+          <rect x="660" y="258" width="118" height="30" fill="#fff0d0" stroke="#eedb9b" />
+          <text x="670" y="277">fact check</text>
+          <rect x="790" y="258" width="154" height="30" fill="#f5f7f2" stroke="#d8e0dc" />
+          <text x="800" y="277">index &rarr; report</text>
+        </g>
+
+        <line x1="542" y1="302" x2="542" y2="330" stroke="#1b7654" stroke-width="1.5" marker-end="url(#arw)" />
+
+        <!-- State -->
+        <g>
+          <rect x="124" y="336" width="268" height="86" fill="#ffffff" stroke="#d8e0dc" stroke-width="1.5" />
+          <text x="140" y="358" font-family="'DM Mono', monospace" font-size="9.5" fill="#1b7654">RELATIONAL</text>
+          <text x="140" y="378" font-family="Manrope, sans-serif" font-size="13" font-weight="700" fill="#172222">SQLite run ledger</text>
+          <text x="140" y="398" font-family="Manrope, sans-serif" font-size="11" fill="#687575">Runs, sources, crawl decisions,</text>
+          <text x="140" y="412" font-family="Manrope, sans-serif" font-size="11" fill="#687575">facts, gaps, guardrails, metrics.</text>
+
+          <rect x="408" y="336" width="268" height="86" fill="#ffffff" stroke="#d8e0dc" stroke-width="1.5" />
+          <text x="424" y="358" font-family="'DM Mono', monospace" font-size="9.5" fill="#1b7654">VECTOR</text>
+          <text x="424" y="378" font-family="Manrope, sans-serif" font-size="13" font-weight="700" fill="#172222">Qdrant Cloud</text>
+          <text x="424" y="398" font-family="Manrope, sans-serif" font-size="11" fill="#687575">Evidence passages, embedded,</text>
+          <text x="424" y="412" font-family="Manrope, sans-serif" font-size="11" fill="#687575">filtered by research city.</text>
+
+          <rect x="692" y="336" width="268" height="86" fill="#ffffff" stroke="#d8e0dc" stroke-width="1.5" />
+          <text x="708" y="358" font-family="'DM Mono', monospace" font-size="9.5" fill="#1b7654">GRAPH</text>
+          <text x="708" y="378" font-family="Manrope, sans-serif" font-size="13" font-weight="700" fill="#172222">Graphiti &rarr; Neo4j Sandbox</text>
+          <text x="708" y="398" font-family="Manrope, sans-serif" font-size="11" fill="#687575">Entities and relationships,</text>
+          <text x="708" y="412" font-family="Manrope, sans-serif" font-size="11" fill="#687575">grouped per city, queried live.</text>
+        </g>
+
+        <line x1="542" y1="422" x2="542" y2="450" stroke="#1b7654" stroke-width="1.5" marker-end="url(#arw)" />
+
+        <!-- External -->
+        <g>
+          <rect x="124" y="456" width="268" height="72" fill="#f5f7f2" stroke="#d8e0dc" stroke-dasharray="4 3" />
+          <text x="140" y="480" font-family="Manrope, sans-serif" font-size="12.5" font-weight="700" fill="#172222">Public search</text>
+          <text x="140" y="500" font-family="Manrope, sans-serif" font-size="11" fill="#687575">Query-time discovery. Nothing</text>
+          <text x="140" y="514" font-family="Manrope, sans-serif" font-size="11" fill="#687575">about a city is pre-seeded.</text>
+
+          <rect x="408" y="456" width="268" height="72" fill="#f5f7f2" stroke="#d8e0dc" stroke-dasharray="4 3" />
+          <text x="424" y="480" font-family="Manrope, sans-serif" font-size="12.5" font-weight="700" fill="#172222">Source websites</text>
+          <text x="424" y="500" font-family="Manrope, sans-serif" font-size="11" fill="#687575">Fetched only after robots.txt</text>
+          <text x="424" y="514" font-family="Manrope, sans-serif" font-size="11" fill="#687575">has been read and honoured.</text>
+
+          <rect x="692" y="456" width="268" height="72" fill="#f5f7f2" stroke="#d8e0dc" stroke-dasharray="4 3" />
+          <text x="708" y="480" font-family="Manrope, sans-serif" font-size="12.5" font-weight="700" fill="#172222">LLM provider</text>
+          <text x="708" y="500" font-family="Manrope, sans-serif" font-size="11" fill="#687575">Embeddings and Graphiti entity</text>
+          <text x="708" y="514" font-family="Manrope, sans-serif" font-size="11" fill="#687575">extraction. Degrades visibly.</text>
+        </g>
+
+        <text x="124" y="552" font-family="'DM Mono', monospace" font-size="9" fill="#9aa6a1">Solid border = inside the deployed service &middot; dashed = third party reached at request time</text>
+      </svg>
+    </div>
+    <figcaption>Figure 1 &mdash; Request path and state ownership</figcaption>
+  </figure>
+
+  <h2>Agent workflow</h2>
+  <p class="section-note">Responsibility is split so that no agent can both produce a claim and bless it. Two stages are gates rather than steps: they can remove work from the pipeline, and what they remove is recorded rather than discarded.</p>
+
+  <figure>
+    <div class="figure-frame">
+      <svg viewBox="0 0 900 668" role="img" aria-label="Vertical agent workflow with branch outcomes for the crawlability gate, extraction failures and the fact check.">
+        <defs>
+          <marker id="arw2" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+            <path d="M0 0 L9 4.5 L0 9 z" fill="#1b7654" />
+          </marker>
+          <marker id="arw3" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+            <path d="M0 0 L9 4.5 L0 9 z" fill="#ed765c" />
+          </marker>
+        </defs>
+
+        <g font-family="Manrope, sans-serif">
+          <!-- 01 -->
+          <rect x="60" y="16" width="360" height="54" fill="#ffffff" stroke="#d8e0dc" />
+          <text x="78" y="38" font-size="13" font-weight="700" fill="#172222">01 &nbsp; Intake and guardrails</text>
+          <text x="78" y="57" font-size="11" fill="#687575">Validates the target, declares geographic scope.</text>
+          <line x1="240" y1="70" x2="240" y2="90" stroke="#1b7654" stroke-width="1.5" marker-end="url(#arw2)" />
+
+          <!-- 02 -->
+          <rect x="60" y="94" width="360" height="54" fill="#ffffff" stroke="#d8e0dc" />
+          <text x="78" y="116" font-size="13" font-weight="700" fill="#172222">02 &nbsp; Research planner</text>
+          <text x="78" y="135" font-size="11" fill="#687575">Expands the city into scoped topic queries.</text>
+          <line x1="240" y1="148" x2="240" y2="168" stroke="#1b7654" stroke-width="1.5" marker-end="url(#arw2)" />
+
+          <!-- 03 -->
+          <rect x="60" y="172" width="360" height="54" fill="#ffffff" stroke="#d8e0dc" />
+          <text x="78" y="194" font-size="13" font-weight="700" fill="#172222">03 &nbsp; Source discovery</text>
+          <text x="78" y="213" font-size="11" fill="#687575">Live public search, de-duplicated by URL.</text>
+          <line x1="240" y1="226" x2="240" y2="246" stroke="#1b7654" stroke-width="1.5" marker-end="url(#arw2)" />
+
+          <!-- 04 gate -->
+          <rect x="60" y="250" width="360" height="54" fill="#fff8e4" stroke="#eedb9b" stroke-width="1.5" />
+          <text x="78" y="272" font-size="13" font-weight="700" fill="#172222">04 &nbsp; Crawlability gate</text>
+          <text x="78" y="291" font-size="11" fill="#687575">Reads robots.txt before a single page is fetched.</text>
+          <path d="M420 277 L520 277" stroke="#ed765c" stroke-width="1.5" fill="none" marker-end="url(#arw3)" />
+          <rect x="530" y="250" width="310" height="54" fill="#ffffff" stroke="#ed765c" />
+          <text x="548" y="272" font-size="12" font-weight="700" fill="#172222">Disallowed &rarr; never fetched</text>
+          <text x="548" y="291" font-size="11" fill="#687575">Source stays listed with its refusal reason.</text>
+          <line x1="240" y1="304" x2="240" y2="324" stroke="#1b7654" stroke-width="1.5" marker-end="url(#arw2)" />
+
+          <!-- 05 -->
+          <rect x="60" y="328" width="360" height="54" fill="#ffffff" stroke="#d8e0dc" />
+          <text x="78" y="350" font-size="13" font-weight="700" fill="#172222">05 &nbsp; Evidence extraction</text>
+          <text x="78" y="369" font-size="11" fill="#687575">Clean text, quote, URL, title, retrieval timestamp.</text>
+          <path d="M420 355 L520 355" stroke="#ed765c" stroke-width="1.5" fill="none" marker-end="url(#arw3)" />
+          <rect x="530" y="328" width="310" height="54" fill="#ffffff" stroke="#ed765c" />
+          <text x="548" y="350" font-size="12" font-weight="700" fill="#172222">Fetch failed &rarr; gap</text>
+          <text x="548" y="369" font-size="11" fill="#687575">Recorded as a named hole in the research.</text>
+          <line x1="240" y1="382" x2="240" y2="402" stroke="#1b7654" stroke-width="1.5" marker-end="url(#arw2)" />
+
+          <!-- 06 gate -->
+          <rect x="60" y="406" width="360" height="54" fill="#fff8e4" stroke="#eedb9b" stroke-width="1.5" />
+          <text x="78" y="428" font-size="13" font-weight="700" fill="#172222">06 &nbsp; Independent fact check</text>
+          <text x="78" y="447" font-size="11" fill="#687575">Separate from the agent that produced the claim.</text>
+          <path d="M420 433 L520 433" stroke="#ed765c" stroke-width="1.5" fill="none" marker-end="url(#arw3)" />
+          <rect x="530" y="406" width="310" height="54" fill="#ffffff" stroke="#ed765c" />
+          <text x="548" y="428" font-size="12" font-weight="700" fill="#172222">Unsupported &rarr; withheld</text>
+          <text x="548" y="447" font-size="11" fill="#687575">Never reaches the brief. Surfaces as a gap.</text>
+          <line x1="240" y1="460" x2="240" y2="480" stroke="#1b7654" stroke-width="1.5" marker-end="url(#arw2)" />
+
+          <!-- 07 -->
+          <rect x="60" y="484" width="360" height="54" fill="#ffffff" stroke="#d8e0dc" />
+          <text x="78" y="506" font-size="13" font-weight="700" fill="#172222">07 &nbsp; Knowledge indexing</text>
+          <text x="78" y="525" font-size="11" fill="#687575">Ledger write, vector upsert, Graphiti episode.</text>
+          <line x1="240" y1="538" x2="240" y2="558" stroke="#1b7654" stroke-width="1.5" marker-end="url(#arw2)" />
+
+          <!-- 08 -->
+          <rect x="60" y="562" width="360" height="54" fill="#d8f3df" stroke="#1b7654" stroke-width="1.5" />
+          <text x="78" y="584" font-size="13" font-weight="700" fill="#172222">08 &nbsp; Brief, graph and Q&amp;A</text>
+          <text x="78" y="603" font-size="11" fill="#1b7654">Findings, gaps, citations, downloadable report.</text>
+
+          <rect x="530" y="484" width="310" height="132" fill="#f5f7f2" stroke="#d8e0dc" stroke-dasharray="4 3" />
+          <text x="548" y="508" font-size="12" font-weight="700" fill="#172222">Knowledge gap ledger</text>
+          <text x="548" y="530" font-size="11" fill="#687575">Every refusal above lands here with its</text>
+          <text x="548" y="546" font-size="11" fill="#687575">topic, reason and source URL, and is</text>
+          <text x="548" y="562" font-size="11" fill="#687575">shown to the user beside the findings.</text>
+          <text x="548" y="590" font-size="11" fill="#1b7654" font-family="'DM Mono', monospace">Absence is a result, not an error.</text>
+          <path d="M530 550 L440 550" stroke="#d8e0dc" stroke-width="1.5" fill="none" />
+          <path d="M440 550 L440 300" stroke="#d8e0dc" stroke-width="1.5" stroke-dasharray="4 3" fill="none" />
+        </g>
+      </svg>
+    </div>
+    <figcaption>Figure 2 &mdash; Agent responsibilities and refusal paths</figcaption>
+  </figure>
+
+  <div class="callout">
+    <strong>The trust rule, stated once:</strong> no source quote means no published fact, and no verified evidence means the answer says the evidence is insufficient. Every refusal is written down where the user can see it.
+  </div>
+
+  <h2>Data architecture</h2>
+  <p class="section-note">Three stores because three questions are genuinely different in shape: <em>what happened in this run</em>, <em>what text is semantically near this question</em>, and <em>what is connected to what</em>. Forcing all three into one store makes two of them slow and one of them lossy.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Store</th><th>What lives here</th><th>Why this store</th><th>Read at</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Relational</strong><span class="mono">SQLite &rarr; PostgreSQL</span></td>
+          <td>Research runs, discovered sources, crawl decisions, verified facts, knowledge gaps, guardrail outcomes, stage traces, run metrics.</td>
+          <td>This is the audit record. It needs exact reads, stable ordering and a schema, not similarity. It is also the only store that can answer &ldquo;what did the system decide, and when&rdquo;.</td>
+          <td>History, report, admin view</td>
+        </tr>
+        <tr>
+          <td><strong>Vector</strong><span class="mono">Qdrant Cloud</span></td>
+          <td>Evidence passages with their full fact payload &mdash; claim, quote, source URL, scope, verification status.</td>
+          <td>A City Lead asks questions in their own words, not in the words of the source. Payload filtering by research city keeps one city&rsquo;s evidence out of another city&rsquo;s answer.</td>
+          <td>Every question</td>
+        </tr>
+        <tr>
+          <td><strong>Graph</strong><span class="mono">Graphiti + Neo4j Sandbox</span></td>
+          <td>Entities and their relationships &mdash; organisations, programmes, policies, places &mdash; grouped per city and timestamped by Graphiti.</td>
+          <td>&ldquo;Who runs what, and how does it connect&rdquo; is a traversal, not a search. Graphiti also gives the memory a time dimension, so a city can be re-researched later without overwriting what was true before.</td>
+          <td>Graph view, entity context</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>Retrieval strategy</h2>
+  <ol class="steps">
+    <li><strong>Scope first.</strong> A question is always bound to one researched city before anything is retrieved, so evidence cannot leak between cities.</li>
+    <li><strong>Vector recall.</strong> The question is embedded and matched against city-filtered evidence passages in Qdrant.</li>
+    <li><strong>Ledger fallback.</strong> If the vector store is unavailable or empty, term overlap against verified facts in the relational ledger takes over, so the demo degrades instead of failing.</li>
+    <li><strong>Graph context.</strong> The relationships around the city are fetched from Neo4j and returned alongside the answer, so the user can see structure as well as text.</li>
+    <li><strong>Refuse cleanly.</strong> If nothing verified matches, the system returns an explicit insufficiency response and does not infer.</li>
+  </ol>
+
+  <h2>Key design decisions</h2>
+  <div class="grid grid-2">
+    <div class="card">
+      <span class="label">Decision 01</span>
+      <h3>Crawlability is a gate, not a filter</h3>
+      <p>robots.txt is read <em>before</em> the first fetch, not after. A disallowed source still appears in the UI with its refusal reason, so the user can follow it manually. Politeness is visible rather than silent.</p>
+    </div>
+    <div class="card">
+      <span class="label">Decision 02</span>
+      <h3>Gaps are a first-class output</h3>
+      <p>A withheld claim is not a failure to hide. It is written to the gap ledger with its topic, reason and URL and shown next to the findings, because a City Lead needs to know what they still have to ask about in the room.</p>
+    </div>
+    <div class="card">
+      <span class="label">Decision 03</span>
+      <h3>Scope is carried on every fact</h3>
+      <p>National figures presented as city figures are the most likely way this system could mislead. Every record carries an explicit geographic scope field, and unresolved scope is flagged rather than quietly assumed.</p>
+    </div>
+    <div class="card">
+      <span class="label">Decision 04</span>
+      <h3>Provider failure is surfaced, not swallowed</h3>
+      <p>When a datastore or LLM provider is unavailable the run continues, the store reports its real state in the admin view, and <span class="mono">/api/provider-check</span> gives a sanitised diagnosis without returning credentials.</p>
+    </div>
+  </div>
+
+  <h2>Trade-offs and what was cut</h2>
+  <ul class="plain">
+    <li><strong>Research breadth was capped deliberately.</strong> A small number of topic queries and a small number of extracted sources per run keeps the end-to-end loop demonstrable inside the timebox. Depth is a tuning problem; the pipeline shape is the hard part.</li>
+    <li><strong>SQLite over managed PostgreSQL.</strong> Zero setup for the case study, and the schema is portable. Local disk on the free tier is ephemeral, so this is explicitly not production storage.</li>
+    <li><strong>No human review step.</strong> The design question &ldquo;should humans review before storage&rdquo; was answered as <em>not yet</em>: the fact-check gate plus a visible gap ledger gives most of the safety, and a review queue would have consumed the remaining time.</li>
+    <li><strong>Single search provider.</strong> A second, independent discovery source would improve both recall and resilience, and is the first thing to add.</li>
+    <li><strong>Conflict handling is unmodelled.</strong> Two sources that disagree currently both appear with their quotes. Detecting and adjudicating contradiction is real work and was consciously deferred.</li>
+    <li><strong>Free hosting sleeps.</strong> First request after idle is slow. Acceptable for evaluation, not for a City Lead on a deadline.</li>
+  </ul>
+
+  <div class="honest">
+    <span class="label">Known limitations in this build</span>
+    <ul>
+      <li><strong>Claim extraction is shallow.</strong> Findings are currently source-level rather than statement-level, so the brief tells you which sources are relevant more strongly than it tells you what they say. Grounded, quote-anchored claim extraction is the highest-value next change.</li>
+      <li><strong>Verification is rule-based.</strong> The fact-check gate enforces quote presence, health context and city-scope sanity. It is independent of the producing stage and it does withhold, but it reasons about evidence shape rather than evidence meaning.</li>
+      <li><strong>Graph retrieval is read-only context.</strong> Neo4j is queried live for the graph view; folding traversal results into the answer path is designed but not yet wired into <span class="mono">/api/ask</span>.</li>
+    </ul>
+  </div>
+
+  <h2>How quality is measured</h2>
+  <p class="section-note">The admin view is part of the argument, not a debug panel. It reports source discovery and crawl approval counts, extraction success, evidence coverage, city-scope quality, verified versus withheld facts, gap count, provider errors, guardrail outcomes and per-stage durations &mdash; so a claim about trustworthiness can be checked rather than believed.</p>
+
+  <footer>CARDIO4Cities case study &middot; architecture overview &middot; <a class="back" href="presentation.html">Open the deck &rarr;</a></footer>
+
+</main>
+</body>
+</html>

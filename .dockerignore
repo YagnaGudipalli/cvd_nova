@@ -1,6 +1,14 @@
 .env
+.env.*
+!.env.example
 .venv
 __pycache__
-data/*.db
+*.pyc
+.pytest_cache
 .git
+.github
+data
+tests
+deploy
 *.docx
+.DS_Store

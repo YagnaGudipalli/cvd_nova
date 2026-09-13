@@ -7,4 +7,9 @@ qdrant-client==1.12.1
 neo4j==5.27.0
 graphiti-core==0.30.2
 openai==3.11.0
+pypdf==6.18.1
+fastembed==0.8.0
+# Pinned: newer onnxruntime wheels for Apple Silicon target macOS 13.4+ and fail
+# to load on earlier releases. 1.19.2 targets macOS 11 and has Linux wheels.
+onnxruntime==1.19.2
 uvicorn[standard]==0.34.0
