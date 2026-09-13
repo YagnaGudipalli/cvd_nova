@@ -29,10 +29,6 @@ services:
         sync: false
       - key: EMBEDDING_API_KEY
         sync: false
-      - key: EMBEDDING_BASE_URL
-        sync: false
-      - key: EMBEDDING_MODEL
-        sync: false
 
       # --- Generation: Groq, open-weights models ------------------------
       - key: LLM_BASE_URL
@@ -67,3 +63,12 @@ services:
       # --- Embeddings: hosted, to stay inside 512 MB --------------------
       - key: EMBEDDING_PROVIDER
         value: api
+      # Google Gemini (AI Studio free tier) via its OpenAI-compatible endpoint.
+      # Verified: gemini-embedding-2 at 768 dimensions separates relevant from
+      # unrelated evidence about as well as the local model does.
+      - key: EMBEDDING_BASE_URL
+        value: https://generativelanguage.googleapis.com/v1beta/openai
+      - key: EMBEDDING_MODEL
+        value: gemini-embedding-2
+      - key: EMBEDDING_DIMENSIONS
+        value: "768"

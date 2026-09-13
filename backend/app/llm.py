@@ -436,8 +436,7 @@ class LanguageModel:
                     self._observed_dimensions = len(vectors[0])
                     self.embed_circuit.close()
                     return vectors, self._local_model_name, self._observed_dimensions
-                response = await self._embeddings().embeddings.create(model=settings.embedding_model, input=texts)
-                vectors = [item.embedding for item in response.data]
+                vectors = await self._embed_remote(texts)
                 self._observed_dimensions = len(vectors[0])
                 self.embed_circuit.close()
                 return vectors, settings.embedding_model, self._observed_dimensions
@@ -448,6 +447,38 @@ class LanguageModel:
                 # mixing semantic and lexical vectors would corrupt retrieval.
                 self.embed_circuit.open(f"{type(error).__name__} ({kind})")
         return [lexical_embedding(text) for text in texts], "lexical-hash", FALLBACK_DIMENSIONS
+
+    #: Hosted embedders cap inputs per request (Gemini: 100); stay under it.
+    EMBEDDING_BATCH = 64
+    EMBEDDING_RATE_LIMIT_BUDGET = 90.0
+
+    async def _embed_remote(self, texts: list[str]) -> list[list[float]]:
+        """Embed through a hosted endpoint, batched, riding out throttling.
+
+        A throttled embedding call is waited out rather than treated as an
+        outage. Graphiti embeds entity names in many small calls, so on a free
+        tier the first 429 used to switch retrieval to lexical vectors for the
+        rest of the run.
+        """
+        extra = {"dimensions": settings.embedding_dimensions} if settings.embedding_dimensions else {}
+        vectors: list[list[float]] = []
+        for start in range(0, len(texts), self.EMBEDDING_BATCH):
+            batch = texts[start : start + self.EMBEDDING_BATCH]
+            throttled_since: float | None = None
+            while True:
+                try:
+                    response = await self._embeddings().embeddings.create(model=settings.embedding_model, input=batch, **extra)
+                    vectors.extend(item.embedding for item in response.data)
+                    break
+                except Exception as error:
+                    kind, retry_after = classify(error)
+                    throttled_since = throttled_since or time.monotonic()
+                    if kind != "rate_limit" or time.monotonic() - throttled_since > self.EMBEDDING_RATE_LIMIT_BUDGET:
+                        raise
+                    wait = min((retry_after or 2.0) + 0.5, 30.0)
+                    logger.info("embedding_rate_limited wait=%.1fs", wait)
+                    await asyncio.sleep(wait)
+        return vectors
 
     def embedding_signature(self) -> tuple[str, int]:
         """The (mode, dimensions) :meth:`embed` will produce right now."""
