@@ -145,7 +145,7 @@ async def extract(
 ) -> tuple[list[Document], list[tuple[Source, str]]]:
     """Fetch approved sources. Returns (documents, [(source, failure reason)])."""
     by_host: dict[str, list[Source]] = defaultdict(list)
-    for source in sources[: limit or settings.max_fetches_per_round]:
+    for source in sources[: settings.max_fetches_per_round if limit is None else limit]:
         by_host[(urlparse(source.fetch_url or source.url).netloc or "").lower()].append(source)
 
     documents: list[Document] = []

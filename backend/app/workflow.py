@@ -296,13 +296,21 @@ async def extract_node(state: ResearchState) -> dict[str, Any]:
     """Fetch permitted sources and reduce them to clean text."""
     started = time.perf_counter()
     city = state["city"]
-    queue = [source for source in state.get("sources", []) if source.crawl_allowed and not source.fetched]
+    # A page that failed in an earlier round is not retried: it already has a gap.
+    unreadable = {gap.source_url for gap in state.get("gaps", []) if gap.kind == "unreachable"}
+    queue = [
+        source for source in state.get("sources", [])
+        if source.crawl_allowed and not source.fetched and source.url not in unreadable
+    ]
     queue.sort(key=fetch_priority, reverse=True)
-    fetch_budget = _round_budget(_profile(state).max_fetches_per_round, state)
+    fetch_budget = _profile(state).source_budget(state.get("round", 1), len(state.get("documents", [])))
     _progress(city, "Reading sources", f"Reading {min(len(queue), fetch_budget)} permitted public sources.", 52, state.get("round", 1))
 
-    async with _client() as client:
-        documents, failures = await extract(client, queue, limit=fetch_budget)
+    if fetch_budget:
+        async with _client() as client:
+            documents, failures = await extract(client, queue, limit=fetch_budget)
+    else:
+        documents, failures = [], []
 
     gaps = state.get("gaps", []) + [
         Gap(

@@ -587,7 +587,7 @@
 
   <h2 id="tradeoffs">Trade-offs and what was cut</h2>
   <ul class="plain">
-    <li><strong>Research depth is a user choice.</strong> Quick (5 sources, one round, ~1&ndash;2 min), Balanced (8 sources, optional smaller second round, ~2&ndash;4 min), Thorough (12 sources, ~4&ndash;8 min). Estimates are measured on Groq's free tier and shown as approximate.</li>
+    <li><strong>Research depth is a user choice.</strong> Quick (5 sources, one round, ~1&ndash;2 min), Balanced (up to 8 sources: 6, then 2 in an optional second round, ~2&ndash;4 min), Thorough (up to 12 sources: 9, then 3, ~4&ndash;8 min). The source count is a cap on pages read across the whole run. Estimates are measured on Groq's free tier and shown as approximate.</li>
     <li><strong>SQLite over managed PostgreSQL.</strong> Zero setup and a portable schema. Local disk on free hosting is ephemeral, so history resets on restart; the vector store and graph persist.</li>
     <li><strong>No human review step.</strong> The fact-check gate plus a visible gap ledger gives most of the safety for a fraction of the time.</li>
     <li><strong>Open-weights models on a hosted free tier</strong> rather than a paid frontier API or a local model. Zero cost and no vendor lock-in, paid for with rate limits &mdash; which the model boundary is built around.</li>

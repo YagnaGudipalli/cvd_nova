@@ -442,9 +442,37 @@ def test_quick_depth_reads_fewer_sources_and_never_starts_a_second_round():
 
     quick, balanced, thorough = PROFILES["quick"], PROFILES["balanced"], PROFILES["thorough"]
     assert quick.max_rounds == 1
-    assert quick.max_fetches_per_round < balanced.max_fetches_per_round < thorough.max_fetches_per_round
+    assert quick.max_sources < balanced.max_sources < thorough.max_sources
     assert get_profile("nonsense").key == "balanced"
     assert get_profile(None).key == "balanced"
+
+
+@pytest.mark.parametrize("depth", ["quick", "balanced", "thorough"])
+def test_a_run_never_reads_more_sources_than_its_depth_promises(depth):
+    """Regression: the follow-up round added its own budget on top, so Balanced
+    read 12 sources and Thorough 18 while the UI promised 8 and 12."""
+    from backend.app.profiles import PROFILES
+
+    profile = PROFILES[depth]
+    read = 0
+    for round_number in range(1, profile.max_rounds + 1):
+        read += profile.source_budget(round_number, read)
+    assert read == profile.max_sources
+    assert str(profile.max_sources) in profile.summary
+
+
+def test_seed_planner_respects_the_query_budget():
+    """Regression: without a model the planner ignored depth and always planned
+    one query per dimension, or two in a follow-up round."""
+    from backend.app.agents.planner import _fallback_plan
+
+    for budget in (3, 5, 6):
+        plan = _fallback_plan("Nairobi", "Kenya", list(DIMENSION_KEYS), 1, budget)
+        assert len(plan) == budget
+    first = _fallback_plan("Nairobi", "Kenya", list(DIMENSION_KEYS), 1, 3)
+    assert len({query.dimension for query in first}) == 3, "a small budget still spreads across dimensions"
+    follow_up = _fallback_plan("Nairobi", "Kenya", ["programmes"], 2, 3)
+    assert len(follow_up) == 2 and not {q.query for q in follow_up} & {q.query for q in first}
 
 
 def test_the_generation_key_is_never_sent_to_a_different_embedding_provider(monkeypatch):

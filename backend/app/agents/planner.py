@@ -28,21 +28,31 @@ Rules:
 - Return strict JSON: {"queries": [{"dimension": "<key>", "query": "<text>", "rationale": "<one short sentence>"}]}"""
 
 
-def _fallback_plan(city: str, country: str | None, dimensions: list[str], round_number: int) -> list[PlannedQuery]:
+def _fallback_plan(city: str, country: str | None, dimensions: list[str], round_number: int, budget: int) -> list[PlannedQuery]:
+    """Seed-term queries, taken one per dimension in turn until the budget is spent.
+
+    Round-robin rather than dimension by dimension, so a small budget still
+    reaches as many dimensions as it can. Later rounds start one term further
+    in, so they do not repeat the first round's wording.
+    """
     location = f"{city} {country}".strip() if country else city
+    targets = [dimension for dimension in DIMENSIONS if dimension.key in dimensions]
+    offset = 1 if round_number > 1 else 0
     plan: list[PlannedQuery] = []
-    for dimension in DIMENSIONS:
-        if dimension.key not in dimensions:
-            continue
-        for term in dimension.seed_terms[: 2 if round_number > 1 else 1]:
-            plan.append(
-                PlannedQuery(
-                    dimension=dimension.key,
-                    query=f"{location} {term}",
-                    rationale=f"Seed term for {DIMENSION_LABELS[dimension.key].lower()}",
-                    round=round_number,
+    depth = 0
+    while len(plan) < budget and any(depth + offset < len(dimension.seed_terms) for dimension in targets):
+        for dimension in targets:
+            terms = dimension.seed_terms[offset:]
+            if depth < len(terms) and len(plan) < budget:
+                plan.append(
+                    PlannedQuery(
+                        dimension=dimension.key,
+                        query=f"{location} {terms[depth]}",
+                        rationale=f"Seed term for {DIMENSION_LABELS[dimension.key].lower()}",
+                        round=round_number,
+                    )
                 )
-            )
+        depth += 1
     return plan
 
 
@@ -79,7 +89,7 @@ async def plan_research(
 
     payload = await language_model.json_call(SYSTEM, instruction, max_tokens=900, purpose="planner", tier="fast")
     if not payload or not isinstance(payload.get("queries"), list):
-        return _fallback_plan(city, country, dimensions, round_number), "seed-terms"
+        return _fallback_plan(city, country, dimensions, round_number, budget), "seed-terms"
 
     valid_keys = {dimension.key for dimension in DIMENSIONS}
     plan: list[PlannedQuery] = []
@@ -101,5 +111,5 @@ async def plan_research(
             )
         )
     if not plan:
-        return _fallback_plan(city, country, dimensions, round_number), "seed-terms"
-    return plan[: budget + 2], f"llm:{settings.llm_model}"
+        return _fallback_plan(city, country, dimensions, round_number, budget), "seed-terms"
+    return plan[:budget], f"llm:{settings.llm_model}"
