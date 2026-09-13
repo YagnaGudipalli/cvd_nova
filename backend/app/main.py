@@ -10,7 +10,8 @@ load_dotenv()
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
 
-from .config import settings  # noqa: E402  (import after load_dotenv so env is populated)
+from .config import settings  # noqa: E402
+from .version import APP_VERSION  # noqa: E402  (import after load_dotenv so env is populated)
 from .research import router as research_router  # noqa: E402
 
 
@@ -20,7 +21,7 @@ STATIC_DIR = BASE_DIR / "frontend"
 app = FastAPI(
     title="CARDIO4Cities Intelligence Studio",
     description="Evidence-first city health research: live research, independent verification, three datastores.",
-    version="2.0.0",
+    version=APP_VERSION,
 )
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 app.include_router(research_router, prefix="/api")
@@ -51,6 +52,7 @@ def health() -> dict[str, object]:
     return {
         "status": "ok",
         "service": "cardio4cities-api",
+        "version": APP_VERSION,
         "llm": settings.llm_configured,
         "vector": settings.qdrant_configured,
         "graph": settings.graph_configured,
@@ -58,7 +60,10 @@ def health() -> dict[str, object]:
 
 
 def _static(name: str, media_type: str) -> FileResponse:
-    return FileResponse(STATIC_DIR / name, media_type=media_type)
+    # Revalidate on every load. Without an explicit policy browsers guess a
+    # freshness lifetime from Last-Modified and kept an old app.js for hours
+    # after a deploy. With the ETag, an unchanged file still costs only a 304.
+    return FileResponse(STATIC_DIR / name, media_type=media_type, headers={"Cache-Control": "no-cache"})
 
 
 @app.get("/", include_in_schema=False)

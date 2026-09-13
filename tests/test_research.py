@@ -461,3 +461,28 @@ def test_the_generation_key_is_never_sent_to_a_different_embedding_provider(monk
 
     monkeypatch.setenv("EMBEDDING_API_KEY", "embed-secret")
     assert Settings().embedding_api_key == "embed-secret"
+
+
+def test_frontend_and_backend_release_versions_match():
+    """Regression: a cached old app.js ran against a new server and failed with
+    "Cannot read properties of undefined (reading 'length')"."""
+    import re
+    from pathlib import Path
+    from backend.app.version import APP_VERSION
+
+    root = Path(__file__).resolve().parents[1]
+    index = (root / "frontend/index.html").read_text()
+    script = (root / "frontend/app.js").read_text()
+    assert f'app.js?v={APP_VERSION}' in index
+    assert f'styles.css?v={APP_VERSION}' in index
+    assert re.search(r'const APP_VERSION = "([^"]+)"', script).group(1) == APP_VERSION
+
+
+def test_app_shell_is_revalidated_on_every_load():
+    from fastapi.testclient import TestClient
+    from backend.app.main import app
+
+    with TestClient(app) as client:
+        for path in ("/", "/app.js", "/styles.css"):
+            assert client.get(path).headers.get("cache-control") == "no-cache", path
+        assert client.get("/health").json()["version"]

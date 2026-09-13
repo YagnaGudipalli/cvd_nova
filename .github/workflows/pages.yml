@@ -23,8 +23,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Configure backend URL
+        # The API address is not a secret. The repository secret still overrides
+        # it; when that secret is missing, Pages previously shipped an empty
+        # address and sent every API call to github.io.
         env:
-          BACKEND_API_URL: ${{ secrets.BACKEND_API_URL }}
+          BACKEND_API_URL: ${{ secrets.BACKEND_API_URL || 'https://cardio4cities-intelligence-studio.onrender.com' }}
         run: printf 'window.CARDIO_API_BASE = "%s";\n' "$BACKEND_API_URL" > frontend/runtime-config.js
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

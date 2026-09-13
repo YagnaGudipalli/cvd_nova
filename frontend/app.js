@@ -7,6 +7,8 @@
  */
 
 const API_BASE = window.CARDIO_API_BASE || "";
+// Must match backend/app/version.py and the ?v= on this file in index.html.
+const APP_VERSION = "2.1.0";
 const $ = (selector) => document.querySelector(selector);
 
 let researchResult = null;
@@ -82,7 +84,7 @@ function renderRuntimeDetail(runtime) {
 /* Workflow                                                            */
 /* ------------------------------------------------------------------ */
 
-function renderWorkflow(steps) {
+function renderWorkflow(steps = []) {
   $("#step-count").textContent = `${steps.length} stages`;
   $("#workflow").innerHTML = steps.map((step, index) => `
     <button class="workflow-step ${index === selectedStep ? "selected" : ""}" data-step-index="${index}" type="button">
@@ -193,7 +195,7 @@ const guardrailsHtml = (guardrails) => guardrails.length ? `
 /* Findings and gaps                                                   */
 /* ------------------------------------------------------------------ */
 
-function renderFacts(facts) {
+function renderFacts(facts = []) {
   $("#fact-count").textContent = `${facts.length} findings`;
   $("#tab-fact-count").textContent = facts.length;
 
@@ -227,7 +229,7 @@ function renderFacts(facts) {
     : `<p class="empty">No claim survived the independent evidence check, so this brief asserts nothing. The gaps opposite say why.</p>`;
 }
 
-function renderGaps(gaps) {
+function renderGaps(gaps = []) {
   const grouped = new Map();
   gaps.forEach((gap) => {
     const key = gap.kind || "missing";
@@ -561,6 +563,23 @@ document.querySelectorAll(".workspace-tab").forEach((tab) => {
   });
 });
 
+async function checkVersion() {
+  // A page from one release talking to a server from another is how a cached
+  // script produced a cryptic error. Say what is wrong and how to fix it.
+  try {
+    const health = await getJSON("/health");
+    if (health.version && health.version !== APP_VERSION) {
+      const banner = $("#version-banner");
+      banner.innerHTML = `<strong>A newer version is available</strong>
+        <p>This page is version ${esc(APP_VERSION)} but the server is ${esc(health.version)}. Reload to get the latest version before starting research.</p>
+        <button type="button" id="reload-app">Reload now</button>`;
+      banner.classList.remove("hidden");
+      $("#reload-app").addEventListener("click", () => window.location.reload());
+    }
+  } catch (error) { /* health is best-effort */ }
+}
+
+checkVersion();
 loadHistory();
 getJSON("/api/profiles").then(renderDepthOptions).catch(() => {});
 getJSON("/api/stores").then(renderStores).catch(() => {});
