@@ -154,6 +154,17 @@
       .masthead { align-items: flex-start; flex-direction: column; gap: 10px; }
       h1 { margin-top: 36px; }
     }
+    .agents { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 20px 0 8px; }
+    .agent { border: 1px solid var(--line); border-top: 3px solid var(--green); background: #fff; padding: 14px; }
+    .agent.gate { border-top-color: #d9a520; background: #fffbef; }
+    .agent .label { display: block; color: var(--green); margin-bottom: 6px; }
+    .agent.gate .label { color: #946b00; }
+    .agent h3 { font-size: .95rem; margin: 0 0 6px; }
+    .agent p { color: var(--muted); font-size: .82rem; line-height: 1.45; margin: 0; }
+    .agent p + p { margin-top: 6px; }
+    .agent p b { color: var(--ink); font-weight: 600; }
+    @media (max-width: 900px) { .agents { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 520px) { .agents { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
@@ -168,26 +179,22 @@
   </header>
 
   <h1>Evidence before confidence.</h1>
-  <p class="lede">A city research workspace that turns live public sources into a source-traceable brief &mdash; and refuses to publish anything it cannot locate in a source and have independently checked.</p>
+  <p class="lede">A team of agents turns live public sources into a cited city brief, and refuses to publish anything it cannot find in a source and have checked by a second agent.</p>
   <div class="runline">
-    <span>FastAPI</span><span>LangGraph &middot; 10 nodes</span><span>Groq &middot; open-weights models</span><span>SQLite ledger</span><span>Qdrant</span><span>Graphiti + Neo4j</span><span>Docker &middot; Render / HF Spaces</span>
+    <span>FastAPI</span><span>LangGraph &middot; 8 agents</span><span>Groq &middot; open-weights models</span><span>SQLite</span><span>Qdrant</span><span>Graphiti + Neo4j</span><span>Docker</span>
   </div>
 
   <nav class="toc" aria-label="Sections">
     <a href="#context">System context</a>
-    <a href="#workflow">Agent workflow</a>
-    <a href="#guards">Fabrication guards</a>
-    <a href="#models">Model routing</a>
-    <a href="#throughput">Throughput and resilience</a>
-    <a href="#data">Data architecture</a>
-    <a href="#retrieval">Retrieval</a>
-    <a href="#deploy">Deployment</a>
-    <a href="#degradation">Degradation</a>
+    <a href="#agents">The agents</a>
+    <a href="#models">Models</a>
+    <a href="#data">Data and retrieval</a>
+    <a href="#resilience">Resilience</a>
     <a href="#tradeoffs">Trade-offs</a>
   </nav>
 
   <h2 id="context">System context</h2>
-  <p class="section-note">One deployed container serves the API and the frontend. Every model call goes through a single boundary that owns pacing, failover and fallback. Durable knowledge lives in hosted stores, because the free hosting tier has an ephemeral disk and sleeps when idle.</p>
+  <p class="section-note">One container serves the API and the UI. Every model call passes through one boundary that handles rate limits and fallbacks. Knowledge lives in hosted stores because free hosting has an ephemeral disk.</p>
 
   <figure>
     <div class="figure-frame">
@@ -233,7 +240,7 @@
 
         <!-- Orchestration -->
         <rect x="124" y="202" width="836" height="84" fill="#ffffff" stroke="#172222" stroke-width="1.5" />
-        <text x="144" y="224" font-family="Manrope, sans-serif" font-size="13" font-weight="700" fill="#172222">LangGraph StateGraph &mdash; 10 nodes, one bounded cycle</text>
+        <text x="144" y="224" font-family="Manrope, sans-serif" font-size="13" font-weight="700" fill="#172222">LangGraph &mdash; 8 agents, 3 gates, one bounded loop</text>
         <g font-family="'DM Mono', monospace" font-size="9" fill="#172222">
           <rect x="140" y="240" width="92" height="30" fill="#f5f7f2" stroke="#d8e0dc" />
           <text x="150" y="259">intake&rarr;plan</text>
@@ -319,295 +326,108 @@
     <figcaption>Figure 1 &mdash; Request path and state ownership</figcaption>
   </figure>
 
-  <h2 id="workflow">Agent workflow</h2>
-  <p class="section-note">Ten LangGraph nodes, each with one responsibility. <code>GET /api/workflow</code> renders the structure from the compiled graph, so the diagram in the UI cannot drift from the code that runs. Three nodes are gates: they remove work, and what they remove is recorded as a gap.</p>
+  <h2 id="agents">The agents</h2>
+  <p class="section-note">Each agent has one job and hands its output to the next. LangGraph orchestrates them and also runs three plain steps: intake, saving and brief assembly. Three agents are <strong>gates</strong>: anything they remove is recorded as a gap the user can see.</p>
 
-  <figure>
-    <div class="figure-frame">
-      <svg viewBox="0 0 900 690" role="img" aria-label="Vertical agent workflow of ten nodes with refusal branches and the sufficiency loop back to planning.">
-        <defs>
-          <marker id="arw2" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
-            <path d="M0 0 L9 4.5 L0 9 z" fill="#1b7654" />
-          </marker>
-          <marker id="arw3" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
-            <path d="M0 0 L9 4.5 L0 9 z" fill="#ed765c" />
-          </marker>
-        </defs>
-
-        <g font-family="Manrope, sans-serif">
-          <!-- 01 intake -->
-          <rect x="90" y="16" width="360" height="46" fill="#ffffff" stroke="#d8e0dc" />
-          <text x="108" y="35" font-size="12.5" font-weight="700" fill="#172222">01 &nbsp; intake</text>
-          <text x="108" y="52" font-size="10.5" fill="#687575">Validates the target, declares six guardrails.</text>
-          <line x1="270" y1="62" x2="270" y2="74" stroke="#1b7654" stroke-width="1.5" marker-end="url(#arw2)" />
-
-          <!-- 02 plan -->
-          <rect x="90" y="78" width="360" height="46" fill="#ffffff" stroke="#d8e0dc" />
-          <text x="108" y="97" font-size="12.5" font-weight="700" fill="#172222">02 &nbsp; plan</text>
-          <text x="108" y="114" font-size="10.5" fill="#687575">Dimension-scoped queries (fast model, seed-term fallback).</text>
-          <line x1="270" y1="124" x2="270" y2="136" stroke="#1b7654" stroke-width="1.5" marker-end="url(#arw2)" />
-
-          <!-- 03 discover -->
-          <rect x="90" y="140" width="360" height="46" fill="#ffffff" stroke="#d8e0dc" />
-          <text x="108" y="159" font-size="12.5" font-weight="700" fill="#172222">03 &nbsp; discover</text>
-          <text x="108" y="176" font-size="10.5" fill="#687575">Public APIs at request time, ranked by source authority.</text>
-          <line x1="270" y1="186" x2="270" y2="198" stroke="#1b7654" stroke-width="1.5" marker-end="url(#arw2)" />
-
-          <!-- 04 crawl gate -->
-          <rect x="90" y="202" width="360" height="46" fill="#fff8e4" stroke="#eedb9b" stroke-width="1.5" />
-          <text x="108" y="221" font-size="12.5" font-weight="700" fill="#172222">04 &nbsp; crawl_gate</text>
-          <text x="108" y="238" font-size="10.5" fill="#687575">RFC 9309 robots.txt decision before any fetch.</text>
-          <path d="M450 225 L530 225" stroke="#ed765c" stroke-width="1.5" fill="none" marker-end="url(#arw3)" />
-          <rect x="540" y="202" width="340" height="46" fill="#ffffff" stroke="#ed765c" />
-          <text x="556" y="221" font-size="11.5" font-weight="700" fill="#172222">Disallowed &rarr; never fetched</text>
-          <text x="556" y="238" font-size="10.5" fill="#687575">Listed with its reason. Gap kind: blocked.</text>
-          <line x1="270" y1="248" x2="270" y2="260" stroke="#1b7654" stroke-width="1.5" marker-end="url(#arw2)" />
-
-          <!-- 05 extract -->
-          <rect x="90" y="264" width="360" height="46" fill="#ffffff" stroke="#d8e0dc" />
-          <text x="108" y="283" font-size="12.5" font-weight="700" fill="#172222">05 &nbsp; extract</text>
-          <text x="108" y="300" font-size="10.5" fill="#687575">HTML / XML / PDF to clean text with a timestamp.</text>
-          <path d="M450 287 L530 287" stroke="#ed765c" stroke-width="1.5" fill="none" marker-end="url(#arw3)" />
-          <rect x="540" y="264" width="340" height="46" fill="#ffffff" stroke="#ed765c" />
-          <text x="556" y="283" font-size="11.5" font-weight="700" fill="#172222">Unreadable &rarr; gap</text>
-          <text x="556" y="300" font-size="10.5" fill="#687575">Timeout, scan without text layer. Gap kind: unreachable.</text>
-          <line x1="270" y1="310" x2="270" y2="322" stroke="#1b7654" stroke-width="1.5" marker-end="url(#arw2)" />
-
-          <!-- 06 claims -->
-          <rect x="90" y="326" width="360" height="46" fill="#ffffff" stroke="#d8e0dc" />
-          <text x="108" y="345" font-size="12.5" font-weight="700" fill="#172222">06 &nbsp; claim_extraction</text>
-          <text x="108" y="362" font-size="10.5" fill="#687575">Model pool proposes claims, each with a quote.</text>
-          <path d="M450 349 L530 349" stroke="#ed765c" stroke-width="1.5" fill="none" marker-end="url(#arw3)" />
-          <rect x="540" y="326" width="340" height="46" fill="#ffffff" stroke="#ed765c" />
-          <text x="556" y="345" font-size="11.5" font-weight="700" fill="#172222">Quote not found in source &rarr; discarded</text>
-          <text x="556" y="362" font-size="10.5" fill="#687575">Counted before any checker tokens are spent.</text>
-          <line x1="270" y1="372" x2="270" y2="384" stroke="#1b7654" stroke-width="1.5" marker-end="url(#arw2)" />
-
-          <!-- 07 fact check -->
-          <rect x="90" y="388" width="360" height="46" fill="#fff8e4" stroke="#eedb9b" stroke-width="1.5" />
-          <text x="108" y="407" font-size="12.5" font-weight="700" fill="#172222">07 &nbsp; fact_check</text>
-          <text x="108" y="424" font-size="10.5" fill="#687575">Numeric guard, then a different model's verdict.</text>
-          <path d="M450 411 L530 411" stroke="#ed765c" stroke-width="1.5" fill="none" marker-end="url(#arw3)" />
-          <rect x="540" y="388" width="340" height="46" fill="#ffffff" stroke="#ed765c" />
-          <text x="556" y="407" font-size="11.5" font-weight="700" fill="#172222">Unsupported &rarr; withheld &middot; national &rarr; flagged</text>
-          <text x="556" y="424" font-size="10.5" fill="#687575">Never reaches the brief as a city figure.</text>
-          <line x1="270" y1="434" x2="270" y2="446" stroke="#1b7654" stroke-width="1.5" marker-end="url(#arw2)" />
-
-          <!-- 08 sufficiency -->
-          <rect x="90" y="450" width="360" height="46" fill="#fff8e4" stroke="#eedb9b" stroke-width="1.5" />
-          <text x="108" y="469" font-size="12.5" font-weight="700" fill="#172222">08 &nbsp; sufficiency</text>
-          <text x="108" y="486" font-size="10.5" fill="#687575">Counts dimensions with city-level verified evidence.</text>
-          <path d="M450 473 L530 473" stroke="#1b7654" stroke-width="1.5" fill="none" marker-end="url(#arw2)" />
-          <rect x="540" y="450" width="340" height="46" fill="#ffffff" stroke="#d8e0dc" />
-          <text x="556" y="469" font-size="11.5" font-weight="700" fill="#172222">&ge; 3 of 5 covered, or rounds spent &rarr; publish</text>
-          <text x="556" y="486" font-size="10.5" fill="#687575">Uncovered dimensions become gaps. Kind: missing.</text>
-
-          <!-- loop back -->
-          <path d="M90 473 L44 473 L44 101 L82 101" stroke="#1b7654" stroke-width="1.5" stroke-dasharray="5 4" fill="none" marker-end="url(#arw2)" />
-          <text transform="translate(34 287) rotate(-90)" text-anchor="middle" font-family="'DM Mono', monospace" font-size="9.5" fill="#1b7654">&lt; 3 COVERED &rarr; RE-PLAN FOR THE GAPS, HALF BUDGET</text>
-          <line x1="270" y1="496" x2="270" y2="508" stroke="#1b7654" stroke-width="1.5" marker-end="url(#arw2)" />
-
-          <!-- 09 index -->
-          <rect x="90" y="512" width="360" height="46" fill="#ffffff" stroke="#d8e0dc" />
-          <text x="108" y="531" font-size="12.5" font-weight="700" fill="#172222">09 &nbsp; index</text>
-          <text x="108" y="548" font-size="10.5" fill="#687575">Ledger write and Qdrant upsert, then return.</text>
-          <path d="M450 535 L530 535" stroke="#d8e0dc" stroke-width="1.5" stroke-dasharray="4 3" fill="none" marker-end="url(#arw2)" />
-          <rect x="540" y="512" width="340" height="46" fill="#f5f7f2" stroke="#d8e0dc" stroke-dasharray="4 3" />
-          <text x="556" y="531" font-size="11.5" font-weight="700" fill="#172222">Graphiti build runs in the background</text>
-          <text x="556" y="548" font-size="10.5" fill="#687575">One episode per source, capped at 8. The brief does not wait.</text>
-          <line x1="270" y1="558" x2="270" y2="570" stroke="#1b7654" stroke-width="1.5" marker-end="url(#arw2)" />
-
-          <!-- 10 report -->
-          <rect x="90" y="574" width="360" height="46" fill="#d8f3df" stroke="#1b7654" stroke-width="1.5" />
-          <text x="108" y="593" font-size="12.5" font-weight="700" fill="#172222">10 &nbsp; report</text>
-          <text x="108" y="610" font-size="10.5" fill="#1b7654">Findings, gaps, quality metrics, downloadable brief.</text>
-          <rect x="540" y="574" width="340" height="46" fill="#f5f7f2" stroke="#d8e0dc" stroke-dasharray="4 3" />
-          <text x="556" y="593" font-size="11.5" font-weight="700" fill="#172222">Knowledge gap ledger</text>
-          <text x="556" y="610" font-size="10.5" fill="#687575">withheld &middot; blocked &middot; unreachable &middot; missing</text>
-
-          <text x="90" y="660" font-family="'DM Mono', monospace" font-size="10" fill="#1b7654">Absence is a result, not an error. Every coral branch lands in the gap ledger.</text>
-        </g>
-      </svg>
+  <div class="agents">
+    <div class="agent">
+      <span class="label">01 &middot; Planner</span>
+      <h3>Decides what to search for</h3>
+      <p>Writes searches for each of the 5 areas. In a second round, only for the areas still missing.</p>
+      <p><b>Uses</b> fast model; seed terms if no model</p>
     </div>
-    <figcaption>Figure 2 &mdash; Node responsibilities, refusal paths and the bounded research cycle</figcaption>
-  </figure>
+    <div class="agent">
+      <span class="label">02 &middot; Discovery</span>
+      <h3>Finds sources</h3>
+      <p>Searches the live web at request time and ranks results by publisher authority.</p>
+      <p><b>Uses</b> OpenAlex, Europe PMC, Wikipedia; optional web search</p>
+    </div>
+    <div class="agent gate">
+      <span class="label">03 &middot; Crawl gate</span>
+      <h3>Asks permission</h3>
+      <p>Reads robots.txt before any page is fetched. A refused site is never read.</p>
+      <p><b>Removes</b> disallowed sources &rarr; gap</p>
+    </div>
+    <div class="agent">
+      <span class="label">04 &middot; Reader</span>
+      <h3>Reads the pages</h3>
+      <p>Fetches permitted HTML, XML and PDF, best sources first, within the chosen depth.</p>
+      <p><b>Removes</b> unreadable pages &rarr; gap</p>
+    </div>
+    <div class="agent">
+      <span class="label">05 &middot; Claim agent</span>
+      <h3>Pulls out findings</h3>
+      <p>Proposes specific claims, each with a quote. A quote that cannot be found in the page is dropped.</p>
+      <p><b>Uses</b> a pool of 3 models</p>
+    </div>
+    <div class="agent gate">
+      <span class="label">06 &middot; Fact checker</span>
+      <h3>Double-checks each claim</h3>
+      <p>A model that did not write the claim rules it supported, scope-flagged or withheld. Numbers must appear in the quote.</p>
+      <p><b>Removes</b> unsupported claims &rarr; gap</p>
+    </div>
+    <div class="agent gate">
+      <span class="label">07 &middot; Sufficiency</span>
+      <h3>Decides if it is enough</h3>
+      <p>Needs verified city evidence in 3 of 5 areas. Otherwise sends the Planner back, up to the round limit.</p>
+      <p><b>Records</b> empty areas as open questions</p>
+    </div>
+    <div class="agent">
+      <span class="label">08 &middot; Answer agent</span>
+      <h3>Answers questions</h3>
+      <p>Answers from stored evidence only, citing it, or says the evidence is not enough.</p>
+      <p><b>Uses</b> vectors, graph, ledger</p>
+    </div>
+  </div>
 
   <div class="callout">
-    <strong>The trust rule, stated once:</strong> no located quote means no claim, no independent verdict means no publication, and no verified evidence means the answer says the evidence is insufficient. Every refusal is written down where the user can see it.
+    <strong>The trust rule:</strong> no agent both writes a claim and approves it. No located quote means no claim; no independent verdict means no publication.
   </div>
 
-  <h2 id="guards">How fabrication is prevented</h2>
-  <p class="section-note">The guarantees that matter most do not depend on a model behaving well. They are string and number checks that run before or instead of a model call &mdash; which also makes them the cheapest part of the pipeline.</p>
-  <div class="grid">
-    <div class="card">
-      <span class="label">Guard 01 &middot; grounding</span>
-      <h3>Quotes must exist in the source</h3>
-      <p>The extractor's quote is located in the full document text. The span stored is the one found <em>in the document</em>, not the one the model wrote. A quote that cannot be located is discarded and counted.</p>
-    </div>
-    <div class="card">
-      <span class="label">Guard 02 &middot; numeric</span>
-      <h3>Figures must appear in the evidence</h3>
-      <p>Any number in a claim that is absent from its quote makes the claim <code>UNSUPPORTED</code> immediately, with no model opinion involved. This is the &ldquo;never invent statistics&rdquo; rule, enforced.</p>
-    </div>
-    <div class="card">
-      <span class="label">Guard 03 &middot; independence</span>
-      <h3>The checker is never the extractor</h3>
-      <p>The fact checker is chosen from models other than the one that extracted the claim, uses an adversarial prompt, does not see the extractor's reasoning, and returns a schema-constrained verdict including scope.</p>
-    </div>
-  </div>
-
-  <h2 id="models">Model routing</h2>
-  <p class="section-note">No single model is right for every job. Work is routed by what it needs &mdash; long-document reading, short structured verdicts, or bursty graph extraction &mdash; and each role gets its own tokens-per-minute budget. Deployed configuration from <code>render.yaml</code>:</p>
+  <h2 id="models">Models</h2>
   <div class="table-wrap">
     <table>
-      <thead>
-        <tr><th>Role</th><th>Model(s)</th><th>Why this choice</th></tr>
-      </thead>
+      <thead><tr><th>Job</th><th>Model</th><th>Why</th></tr></thead>
       <tbody>
-        <tr>
-          <td><strong>Claim extraction</strong><span class="mono">LLM_EXTRACTION_MODELS</span></td>
-          <td>Pool: <code>qwen/qwen3.8-27b</code>, <code>openai/gpt-oss-120b</code>, <code>openai/gpt-oss-20b</code></td>
-          <td>The throughput bottleneck. Each call is ~3,500 tokens and a free-tier model allows ~8,000 per minute, so one model clears about two sources a minute. Limits are metered per model, so extraction rotates across three and moves to whichever is free soonest.</td>
-        </tr>
-        <tr>
-          <td><strong>Fact check</strong><span class="mono">any model but the extractor</span></td>
-          <td>Fast model first, then graph and pool models, minus the one that extracted</td>
-          <td>Independence is structural. <code>reasoning_effort=low</code> measured 3&times; fewer tokens and 3.4&times; faster with no invalid outputs on a four-field verdict. Strict JSON schema, because loose JSON mode was rejected by the provider about one call in six.</td>
-        </tr>
-        <tr>
-          <td><strong>Planning and answers</strong><span class="mono">LLM_FAST_MODEL</span></td>
-          <td><code>openai/gpt-oss-20b</code></td>
-          <td>Short structured tasks. A small model is faster, has higher rate limits, and both have a deterministic fallback (seed-term plan, extractive answer).</td>
-        </tr>
-        <tr>
-          <td><strong>Knowledge graph</strong><span class="mono">GRAPH_MODEL / GRAPH_FAST_MODEL</span></td>
-          <td><code>openai/gpt-oss-120b</code> / <code>openai/gpt-oss-20b</code></td>
-          <td>Graphiti makes several structured calls per episode. A separate model keeps that work in its own budget instead of starving claim extraction, and it runs after the brief is ready.</td>
-        </tr>
-        <tr>
-          <td><strong>Embeddings</strong><span class="mono">EMBEDDING_PROVIDER</span></td>
-          <td>Local: <code>BAAI/bge-small-en-v1.5</code> in-process (384-d). Render: hosted API with its own key.</td>
-          <td>Local embeddings cost nothing and need no server or GPU, but hold ~186 MB of memory. On a 512 MB host they are moved to an API. One embedder serves Qdrant, Graphiti and the reranker.</td>
-        </tr>
+        <tr><td><strong>Claim extraction</strong></td><td><code>qwen3.8-27b</code>, <code>gpt-oss-120b</code>, <code>gpt-oss-20b</code></td><td>The bottleneck; rotating 3 models triples the free rate limit.</td></tr>
+        <tr><td><strong>Fact check</strong></td><td>Any model except the extractor</td><td>Independence is enforced by routing, not by prompt.</td></tr>
+        <tr><td><strong>Planning, answers</strong></td><td><code>gpt-oss-20b</code></td><td>Short structured tasks; fast, with a fallback.</td></tr>
+        <tr><td><strong>Knowledge graph</strong></td><td><code>gpt-oss-120b</code></td><td>Its own budget, so it never slows the brief.</td></tr>
+        <tr><td><strong>Embeddings</strong></td><td><code>bge-small</code> locally, hosted API on Render</td><td>Free locally; moved off the 512 MB host.</td></tr>
       </tbody>
     </table>
   </div>
 
-  <h2 id="throughput">Throughput and resilience on free tiers</h2>
-  <p class="section-note">A free generation tier is not unreliable so much as tightly metered. Most of the engineering in the model boundary exists to spend each per-minute window on work rather than on rejected requests &mdash; and to never pass off a degraded result as a full one.</p>
-  <ol class="steps">
-    <li><strong>Shared cooldown per model.</strong> The first 429 sets a resume time every caller for that model honours. Without it, concurrent callers backed off separately and collided again &mdash; once 75 rejected requests to land 16.</li>
-    <li><strong>Failover, not waiting.</strong> A throttled extraction call moves to the pool model that is free soonest rather than queueing behind the throttled one.</li>
-    <li><strong>A time budget, not a retry count.</strong> Throttled calls retry for up to 300 s using the provider's <code>retry-after</code>. Giving up after three collisions used to drop most fact checks to the weaker rules path in a busy round.</li>
-    <li><strong>Rate limit is not an outage.</strong> Throttling and exhausted quota raise the same SDK exception; they are told apart by the structured error code. Matching words once turned Groq's &ldquo;billing&rdquo; upgrade link into a terminal outage.</li>
-    <li><strong>Half-open circuit breakers.</strong> A terminal error opens the circuit so a dead key costs one call, not one per document; after 120 s a single probe lets a fixed key recover without a restart. Chat and embeddings fail independently.</li>
-    <li><strong>Fallbacks are counted.</strong> Facts checked by rules instead of the model raise a guardrail warning and appear in the run metrics.</li>
-  </ol>
-
-  <h2 id="data">Data architecture</h2>
-  <p class="section-note">Three stores because three questions are genuinely different in shape: <em>what happened in this run</em>, <em>what text is semantically near this question</em>, and <em>what is connected to what</em>. Forcing all three into one store makes two of them slow and one of them lossy.</p>
-
+  <h2 id="data">Data and retrieval</h2>
   <div class="table-wrap">
     <table>
-      <thead>
-        <tr><th>Store</th><th>What lives here</th><th>Why this store</th><th>Read at</th></tr>
-      </thead>
+      <thead><tr><th>Store</th><th>Holds</th><th>Answers</th></tr></thead>
       <tbody>
-        <tr>
-          <td><strong>Relational</strong><span class="mono">SQLite &rarr; PostgreSQL</span></td>
-          <td>Research runs, sources, crawl decisions, verified facts, knowledge gaps, entities, guardrail outcomes, stage traces, run metrics, graph build status.</td>
-          <td>The audit record. It needs exact reads, stable ordering and a schema, not similarity. The only store that is always available, which keeps the system inspectable with no providers configured.</td>
-          <td>History, report, runtime view, Q&amp;A fallback</td>
-        </tr>
-        <tr>
-          <td><strong>Vector</strong><span class="mono">Qdrant Cloud</span></td>
-          <td>Verified evidence with its full payload &mdash; claim, quote, source, scope, verification status.</td>
-          <td>A City Lead asks in their own words. Payload filtering by city keeps evidence from leaking between cities. The collection is named after the embedding signature, so vectors from one model are never queried with another; point IDs are <code>uuid5(city, source, claim)</code>, so re-running a city updates in place.</td>
-          <td>Every question</td>
-        </tr>
-        <tr>
-          <td><strong>Graph</strong><span class="mono">Graphiti + Neo4j</span></td>
-          <td>Typed entities &mdash; <code>Organization</code>, <code>Programme</code>, <code>Policy</code>, <code>HealthIndicator</code>, <code>Place</code> &mdash; and their relationships, grouped per city.</td>
-          <td>&ldquo;Who runs what&rdquo; is a traversal, not a search. Graphiti's bi-temporal tracking lets a city be re-researched without overwriting what was true before. Its three OpenAI-only defaults were replaced: generic JSON-schema client, the system embedder, and an embedding-based reranker.</td>
-          <td>Graph view, every question</td>
-        </tr>
+        <tr><td><strong>SQLite</strong></td><td>Runs, sources, crawl decisions, facts, gaps, metrics</td><td>&ldquo;What did the system decide, and why?&rdquo;</td></tr>
+        <tr><td><strong>Qdrant</strong></td><td>Verified evidence, filtered by city</td><td>&ldquo;What evidence is near my question?&rdquo;</td></tr>
+        <tr><td><strong>Graphiti + Neo4j</strong></td><td>Organisations, programmes, policies, places</td><td>&ldquo;Who is connected to what?&rdquo;</td></tr>
       </tbody>
     </table>
   </div>
+  <p class="section-note">A question is tied to one city, searched in vectors and graph at the same time, reranked, and answered with numbered citations that resolve to stored records. If a store is down, the ledger still answers.</p>
 
-  <h2 id="retrieval">Retrieval strategy</h2>
-  <ol class="steps">
-    <li><strong>Scope first.</strong> A question is bound to one researched city before anything is retrieved, so evidence cannot leak between cities.</li>
-    <li><strong>Vector and graph concurrently.</strong> Qdrant for semantic recall over verified evidence, <code>graphiti.search()</code> for relationship facts in the city's subgraph.</li>
-    <li><strong>Ledger fallback.</strong> When fewer than three items come back, term matching over the relational ledger tops up the evidence, so retrieval degrades instead of disappearing.</li>
-    <li><strong>Synthesis from numbered evidence.</strong> The fast model must cite evidence numbers; the API resolves them back to stored records, and national evidence must be labelled as national in the sentence that uses it.</li>
-    <li><strong>Refuse cleanly.</strong> No verified match returns an explicit insufficiency answer and the related gaps, not an inference.</li>
-  </ol>
-
-  <h2 id="deploy">Deployment topology</h2>
-  <p class="section-note">The whole stack runs on free tiers. The deciding constraint was memory, and it was measured rather than assumed.</p>
-  <div class="stats">
-    <div class="stat"><b>512 MB</b><span>Render free instance memory limit</span></div>
-    <div class="stat"><b>394 MB</b><span>Idle with the in-process embedding model</span></div>
-    <div class="stat"><b>208 MB</b><span>Idle with hosted embeddings</span></div>
-    <div class="stat"><b>+50&ndash;100 MB</b><span>Added by a research run in flight</span></div>
-  </div>
-  <div class="grid">
-    <div class="card">
-      <span class="label">Render &middot; blueprint</span>
-      <p>Docker web service, <code>/health</code> check, auto-deploy. Groq generation, graph models and <code>EMBEDDING_PROVIDER=api</code> are committed; every credential is <code>sync: false</code> and entered in the dashboard.</p>
-    </div>
-    <div class="card">
-      <span class="label">Hugging Face Spaces</span>
-      <p>Same image on a larger free container. The embedding model is baked into the image, so a cold start does not pay the ~14 s model load inside the first research run.</p>
-    </div>
-    <div class="card">
-      <span class="label">GitHub Pages</span>
-      <p>Optional static frontend. The workflow injects the backend URL at deploy time; the API stays on Render.</p>
-    </div>
-  </div>
-  <div class="callout">
-    <strong>Credential isolation.</strong> A provider only ever receives its own key. The OpenAI key is sent only to OpenAI; when embeddings use a different provider from generation they use <code>EMBEDDING_API_KEY</code>, and without it fall back to lexical vectors rather than sending the Groq key to a third party. <code>/api/provider-check</code> diagnoses providers without echoing credentials.
-  </div>
-
-  <h2 id="degradation">Graceful degradation</h2>
-  <p class="section-note">Configuration is not capability. <code>GET /api/runtime</code> reports what the system can actually do right now, and the UI shows a banner when it is running reduced.</p>
-  <div class="table-wrap">
-    <table>
-      <thead><tr><th>Missing or failing</th><th>What happens instead</th></tr></thead>
-      <tbody>
-        <tr><td><strong>Generation model</strong></td><td>Claims become extractive &mdash; sentences naming the city, selected verbatim, so they still cannot be fabricated. Verification is rule-based, planning uses ontology seed terms, answers list the closest findings. Graph writing is skipped.</td></tr>
-        <tr><td><strong>Embeddings</strong></td><td>Deterministic hashed lexical vectors, in a separately named collection so they never mix with semantic vectors.</td></tr>
-        <tr><td><strong>Qdrant</strong></td><td>Questions are answered from the relational ledger by term matching.</td></tr>
-        <tr><td><strong>Neo4j / Graphiti</strong></td><td>Graph view and graph retrieval are empty and say so; the brief is unaffected.</td></tr>
-        <tr><td><strong>Keyed web search</strong></td><td>Discovery runs on keyless scholarly APIs and records that government and municipal pages are under-represented as a gap.</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <h2 id="tradeoffs">Trade-offs and what was cut</h2>
+  <h2 id="resilience">Resilience</h2>
   <ul class="plain">
-    <li><strong>Research depth is a user choice.</strong> Quick (5 sources, one round, ~1&ndash;2 min), Balanced (up to 8 sources: 6, then 2 in an optional second round, ~2&ndash;4 min), Thorough (up to 12 sources: 9, then 3, ~4&ndash;8 min). The source count is a cap on pages read across the whole run. Estimates are measured on Groq's free tier and shown as approximate.</li>
-    <li><strong>SQLite over managed PostgreSQL.</strong> Zero setup and a portable schema. Local disk on free hosting is ephemeral, so history resets on restart; the vector store and graph persist.</li>
-    <li><strong>No human review step.</strong> The fact-check gate plus a visible gap ledger gives most of the safety for a fraction of the time.</li>
-    <li><strong>Open-weights models on a hosted free tier</strong> rather than a paid frontier API or a local model. Zero cost and no vendor lock-in, paid for with rate limits &mdash; which the model boundary is built around.</li>
-    <li><strong>Discovery through APIs, not scraped search.</strong> Search engines serve captchas to non-browser clients, and scraping them sits badly beside a crawl-permission gate.</li>
-    <li><strong>Free hosting sleeps.</strong> The first request after idle is slow. Acceptable for evaluation, not for a City Lead on a deadline.</li>
+    <li><strong>Rate limit is not an outage.</strong> A throttled call moves to the model that is free soonest; all callers share one cooldown.</li>
+    <li><strong>Degrade, and say so.</strong> Without a model, claims become verbatim sentences and checks become rules. The UI shows a banner and the run counts it.</li>
+    <li><strong>Brief first, graph later.</strong> The graph builds in the background; the user never waits for it.</li>
   </ul>
 
+  <h2 id="tradeoffs">Trade-offs</h2>
   <div class="honest">
-    <span class="label">Known limitations in this build</span>
+    <span class="label">Chosen, and what it costs</span>
     <ul>
-      <li><strong>Conflicting sources are not adjudicated.</strong> Two sources that disagree both appear with their quotes.</li>
-      <li><strong>No OCR.</strong> PDFs are read (capped at 60 pages / 12 MB); a scan without a text layer is recorded as needing OCR.</li>
-      <li><strong>The graph reranker is a bi-encoder.</strong> Cosine similarity on embeddings is less precise than a cross-encoder, chosen because it runs on any embedding endpoint.</li>
-      <li><strong>The graph lags the brief.</strong> It is built in the background and capped at eight episodes per run, so relationships appear a few minutes after findings.</li>
-      <li><strong>No authentication or multi-tenancy.</strong> Required before real use.</li>
+      <li><strong>Free open-weights models:</strong> $0 and no lock-in, paid for with rate limits.</li>
+      <li><strong>Scholarly APIs, no web-search key:</strong> government and policy pages are under-represented.</li>
+      <li><strong>No human review, no OCR, no authentication:</strong> the fact-check gate and visible gaps carry the safety.</li>
+      <li><strong>SQLite on free hosting:</strong> history resets on restart; vectors and graph persist.</li>
     </ul>
   </div>
-
-  <h2>How quality is measured</h2>
-  <p class="section-note">The runtime view is part of the argument, not a debug panel. Each run reports sources discovered, crawl-approved and refused, sources read, candidate versus verified claims, withheld and scope-flagged facts, facts checked by model versus rules, claims extracted by model versus heuristically, dimension coverage, city-scope quality, mean confidence, provider errors, guardrail outcomes and per-stage durations &mdash; so a claim about trustworthiness can be checked rather than believed.</p>
 
   <footer>CARDIO4Cities case study &middot; architecture overview &middot; <a class="back" href="presentation.html">Open the deck &rarr;</a></footer>
 

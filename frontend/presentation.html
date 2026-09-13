@@ -348,13 +348,13 @@
       <h1>City research workspace</h1>
       <ul class="pts">
         <li><strong>For:</strong> City Leads preparing government and healthcare meetings</li>
-        <li><strong>Input:</strong> a city name. <strong>Output:</strong> a cited brief, a gap list, a knowledge graph, Q&amp;A</li>
-        <li><strong>Rule:</strong> every sentence traces to a source; every unknown stays visible</li>
+        <li><strong>In:</strong> a city name. <strong>Out:</strong> a cited brief, open questions, a knowledge graph, Q&amp;A</li>
+        <li><strong>Rule:</strong> every finding traces to a source; every unknown stays visible</li>
       </ul>
       <div class="stats">
-        <div class="stat"><b>10</b><span>LangGraph agents, 3 of them gates</span></div>
+        <div class="stat"><b>8</b><span>agents, 3 of them gates</span></div>
         <div class="stat"><b>3</b><span>datastores: ledger, vectors, graph</span></div>
-        <div class="stat"><b>42 s</b><span>Quick brief, measured end to end</span></div>
+        <div class="stat"><b>51 s</b><span>Hyderabad brief, measured</span></div>
         <div class="stat"><b>$0</b><span>models, discovery, storage, hosting</span></div>
       </div>
     </div>
@@ -362,108 +362,95 @@
     <span class="slide-no">01 / 11</span></div>
   </section>
 
-  <!-- 02 · Problem and decomposition -->
+  <!-- 02 · Problem -->
   <section class="slide" id="s2">
     <div class="canvas"><div class="content">
-      <h2>The problem, and how it was decomposed</h2>
+      <h2>The problem</h2>
       <div class="split">
         <div>
           <b class="label">Today</b>
           <ul class="pts">
-            <li>Days of reading portals, statistics, papers, policy</li>
-            <li>Ends as one person&rsquo;s document &mdash; unverifiable, not reusable</li>
+            <li>Days of reading portals, papers and policy</li>
+            <li>Ends as one person&rsquo;s unverifiable document</li>
           </ul>
-          <b class="label warn">Real risk: confidently wrong</b>
+          <b class="label warn">The real risk: confidently wrong</b>
           <ul class="pts">
-            <li>A <strong>national</strong> statistic quoted as a <strong>city</strong> one</li>
-            <li>A programme that ended years ago</li>
-            <li>A figure nobody can source</li>
-          </ul>
-          <b class="label">So the goal</b>
-          <ul class="pts">
-            <li>Not a summariser &mdash; research whose answers can be interrogated</li>
-            <li>Out of scope: views of named individuals</li>
+            <li>A <strong>national</strong> figure quoted as a <strong>city</strong> one</li>
+            <li>A statistic nobody can source</li>
           </ul>
         </div>
         <div>
-          <b class="label">&ldquo;Understanding a city&rdquo; = 5 dimensions, enforced by the workflow</b>
+          <b class="label">&ldquo;Understanding a city&rdquo; = 5 areas</b>
           <table class="dt">
-            <tr><th>#</th><th>Dimension</th><th>Example question</th></tr>
-            <tr><td>01</td><td class="pick"><strong>Burden</strong></td><td>How common are CVD, hypertension, diabetes?</td></tr>
-            <tr><td>02</td><td class="pick"><strong>Programmes</strong></td><td>What screening already runs, and who runs it?</td></tr>
-            <tr><td>03</td><td class="pick"><strong>Policy</strong></td><td>Which municipal or national NCD plans are in force?</td></tr>
-            <tr><td>04</td><td class="pick"><strong>Access</strong></td><td>Facilities, workforce, pathways to care?</td></tr>
-            <tr><td>05</td><td class="pick"><strong>Actors</strong></td><td>Which institutions matter?</td></tr>
+            <tr><th>Area</th><th>Question</th></tr>
+            <tr><td>Burden</td><td>How common are CVD, hypertension, diabetes?</td></tr>
+            <tr><td>Programmes</td><td>What screening already runs?</td></tr>
+            <tr><td>Policy</td><td>Which NCD plans are in force?</td></tr>
+            <tr><td>Access</td><td>Facilities, workforce, pathways to care?</td></tr>
+            <tr><td>Actors</td><td>Which institutions matter?</td></tr>
           </table>
-          <p class="small">Planner queries each dimension; the sufficiency gate measures coverage against them.</p>
         </div>
       </div>
     </div>
     <span class="slide-no">02 / 11</span></div>
   </section>
 
-  <!-- 03 · Worked example -->
+  <!-- 03 · Agent team -->
   <section class="slide" id="s3">
     <div class="canvas"><div class="content">
-      <h2>Worked example: Nairobi, Kenya</h2>
-      <p class="small">Recorded run, 12 Sep 2026 &middot; 2 research rounds &middot; 133 s &middot; <code>docs/examples/nairobi-research-run.json</code></p>
-      <div class="split">
-        <div>
-          <b class="label">From 75 sources to 25 facts</b>
-          <div class="bars">
-            <div class="bar"><span>Discovered</span><i style="--w:100%"></i><em>75</em></div>
-            <div class="bar"><span>Crawl-approved</span><i style="--w:77%"></i><em>58</em></div>
-            <div class="bar"><span>Extracted</span><i style="--w:27%"></i><em>20</em></div>
-            <div class="bar"><span>Candidate claims</span><i style="--w:35%"></i><em>26</em></div>
-            <div class="bar"><span>Verified facts</span><i style="--w:33%"></i><em>25</em></div>
-            <div class="bar coral"><span>Withheld</span><i style="--w:1.3%"></i><em>1</em></div>
-          </div>
-          <b class="label">Facts per dimension</b>
-          <div class="bars">
-            <div class="bar"><span>Access</span><i style="--w:100%"></i><em>8</em></div>
-            <div class="bar"><span>Burden</span><i style="--w:87%"></i><em>7</em></div>
-            <div class="bar"><span>Policy</span><i style="--w:75%"></i><em>6</em></div>
-            <div class="bar"><span>Actors</span><i style="--w:50%"></i><em>4</em></div>
-            <div class="bar coral"><span>Programmes</span><i style="--w:0%"></i><em>0 &rarr; gap</em></div>
-          </div>
-        </div>
-        <div>
-          <div class="card"><b>Finding · access · city scope</b><strong>&ldquo;Nairobi&rsquo;s primary and TB healthcare is coordinated by 12 subcounty health management teams and 23 TB care zones.&rdquo;</strong><span>Source: <em>Providing person-centred TB care</em> (Europe PMC) &middot; quote located in source &middot; verdict SUPPORTED</span></div>
-          <div class="card warn" style="margin-top:10px"><b>Gap · programmes</b><strong>No verified, city-specific programme found</strong><span>Logged as an open question for the meeting &mdash; not filled with a guess.</span></div>
-          <table class="dt">
-            <tr><th>Gap type</th><th>Count</th><th>Reason</th></tr>
-            <tr><td>Blocked</td><td>17</td><td>PDF links &mdash; kept for manual review</td></tr>
-            <tr><td>Missing</td><td>2</td><td>No web-search key: government pages thin</td></tr>
-            <tr><td>Withheld</td><td>1</td><td>Quote had no health content</td></tr>
-            <tr><td>No coverage</td><td>1</td><td>Programmes dimension empty</td></tr>
-          </table>
-        </div>
+      <h2>AI solution: a team of agents</h2>
+      <div class="flow">
+        <span>Planner</span><i>&rarr;</i><span>Discovery</span><i>&rarr;</i><span class="gate">Crawl gate</span><i>&rarr;</i><span>Reader</span><i>&rarr;</i>
+        <span>Claim agent</span><i>&rarr;</i><span class="gate">Fact checker</span><i>&rarr;</i><span class="gate">Sufficiency</span><i>&rarr;</i><span>Brief</span>
       </div>
+      <div class="loop">&#8634; Sufficiency sends the Planner back for missing areas &middot; bounded by depth</div>
+      <table class="dt">
+        <tr><th>Agent</th><th>Job</th><th>Hands on</th></tr>
+        <tr><td>Planner</td><td>Turns the city into searches per area</td><td>Search queries</td></tr>
+        <tr><td>Discovery</td><td>Searches OpenAlex, Europe PMC, Wikipedia; ranks by authority</td><td>Candidate sources</td></tr>
+        <tr><td><span class="tag">gate</span> Crawl gate</td><td>Reads robots.txt before any fetch</td><td>Permitted sources</td></tr>
+        <tr><td>Reader</td><td>Fetches HTML, XML, PDF</td><td>Clean text</td></tr>
+        <tr><td>Claim agent</td><td>Proposes findings, each with an exact quote</td><td>Candidate claims</td></tr>
+        <tr><td><span class="tag">gate</span> Fact checker</td><td>A different model judges each claim</td><td>Published or withheld</td></tr>
+        <tr><td><span class="tag">gate</span> Sufficiency</td><td>Are 3 of 5 areas covered?</td><td>Publish, or search again</td></tr>
+        <tr><td>Answer agent</td><td>Answers questions from stored evidence only</td><td>Cited answer, or &ldquo;not enough evidence&rdquo;</td></tr>
+      </table>
+      <p class="small">Rule: no agent both writes a claim and approves it. LangGraph orchestrates; gates record what they remove as gaps.</p>
     </div>
     <span class="slide-no">03 / 11</span></div>
   </section>
 
-  <!-- 04 · Architecture and agentic design -->
+  <!-- 04 · Worked example -->
   <section class="slide" id="s4">
     <div class="canvas"><div class="content">
-      <h2>AI solution and architecture</h2>
-      <div class="flow">
-        <span>Intake</span><i>&rarr;</i><span>Plan</span><i>&rarr;</i><span>Discover</span><i>&rarr;</i>
-        <span class="gate">Crawl gate</span><i>&rarr;</i><span>Extract</span><i>&rarr;</i><span>Claims</span><i>&rarr;</i>
-        <span class="gate">Fact check</span><i>&rarr;</i><span class="gate">Sufficiency</span><i>&rarr;</i><span>Index</span><i>&rarr;</i><span>Report</span>
+      <h2>Worked example: Hyderabad, India</h2>
+      <p class="small">Recorded run &middot; 13 Sep 2026 &middot; Balanced depth &middot; 1 round &middot; 51 s &middot; <code>docs/examples/hyderabad-research-run.json</code></p>
+      <div class="split">
+        <div>
+          <b class="label">From 46 sources to 4 findings</b>
+          <div class="bars">
+            <div class="bar"><span>Discovered</span><i style="--w:100%"></i><em>46</em></div>
+            <div class="bar"><span>Permitted</span><i style="--w:98%"></i><em>45</em></div>
+            <div class="bar"><span>Read</span><i style="--w:13%"></i><em>6</em></div>
+            <div class="bar"><span>Claims</span><i style="--w:11%"></i><em>5</em></div>
+            <div class="bar"><span>Published</span><i style="--w:9%"></i><em>4</em></div>
+            <div class="bar coral"><span>Withheld</span><i style="--w:2%"></i><em>1</em></div>
+          </div>
+          <b class="label">Findings per area</b>
+          <div class="bars">
+            <div class="bar"><span>Actors</span><i style="--w:100%"></i><em>2</em></div>
+            <div class="bar"><span>Burden</span><i style="--w:50%"></i><em>1</em></div>
+            <div class="bar"><span>Programmes</span><i style="--w:50%"></i><em>1</em></div>
+            <div class="bar coral"><span>Policy</span><i style="--w:0%"></i><em>0 &rarr; gap</em></div>
+            <div class="bar coral"><span>Access</span><i style="--w:0%"></i><em>0 &rarr; gap</em></div>
+          </div>
+        </div>
+        <div>
+          <div class="card"><b>Finding · burden · partially supported</b><strong>&ldquo;Common comorbidities were hypertension (22/40, 55%), dyslipidemia (19/40, 47.5%), and diabetes mellitus (9/40, 22.5%).&rdquo;</strong><span>40 surgical patients at Nizam&rsquo;s Institute of Medical Sciences (<em>Cureus</em>, 2026). Confidence 0.70: a hospital sample, not city prevalence.</span></div>
+          <div class="card warn" style="margin-top:10px"><b>Withheld by the fact checker</b><strong>A programme claim placed five meetings in Hyderabad</strong><span>The quote said they were held in five different cities, so the claim never reached the brief.</span></div>
+          <div class="card warn" style="margin-top:10px"><b>Open questions for the meeting</b><span>No verified city evidence on <em>policy</em> or <em>access</em>. Government pages are thin without a web-search key.</span></div>
+        </div>
       </div>
-      <div class="loop">&#8634; Sufficiency &rarr; Plan if &lt; 3 of 5 dimensions have city evidence · bounded by depth</div>
-      <table class="dt">
-        <tr><th>Agent</th><th>Does</th><th>Nairobi example</th></tr>
-        <tr><td>Plan</td><td>Queries per dimension</td><td>&ldquo;Nairobi Kenya hypertension screening programme&rdquo;</td></tr>
-        <tr><td>Discover</td><td>Keyless APIs: OpenAlex, Europe PMC, Wikipedia</td><td>75 candidate sources over 2 rounds</td></tr>
-        <tr><td><span class="tag">gate</span> Crawl</td><td>robots.txt before first byte; refusals listed</td><td>58 approved, 17 kept aside</td></tr>
-        <tr><td>Extract &rarr; Claims</td><td>Reads HTML, XML, PDF; only agent that phrases a claim</td><td>26 candidate claims</td></tr>
-        <tr><td><span class="tag">gate</span> Fact check</td><td>Never the extracting model; SUPPORTED / UNSUPPORTED / SCOPE_MISMATCH</td><td>25 published, 1 withheld</td></tr>
-        <tr><td><span class="tag">gate</span> Sufficiency</td><td>Research more, or publish with gaps declared</td><td>Round 2 triggered, then published</td></tr>
-        <tr><td>Index &rarr; Report</td><td>Vectors, graph, brief</td><td>25 facts indexed; brief + 21 gaps</td></tr>
-      </table>
-      <p class="small">Rule: no agent both produces a claim and approves it. <code>GET /api/workflow</code> draws this from the compiled graph.</p>
     </div>
     <span class="slide-no">04 / 11</span></div>
   </section>
@@ -474,18 +461,14 @@
       <h2>Tech stack</h2>
       <table class="dt">
         <tr><th>Layer</th><th>Choice</th><th>Why</th></tr>
-        <tr><td>Orchestration</td><td class="pick">LangGraph</td><td>Explicit nodes, gates and a bounded cycle; graph is introspectable</td></tr>
-        <tr><td>LLMs</td><td class="pick">Open-weights on Groq: qwen3.8-27b, gpt-oss-120b, gpt-oss-20b</td><td>Free, fast; same models run on Ollama / vLLM via OpenAI-compatible API</td></tr>
-        <tr><td>Embeddings</td><td class="pick">bge-small (fastembed) locally &middot; Gemini on Render</td><td>One embedder shared by vectors, graph and reranking</td></tr>
-        <tr><td>Discovery</td><td class="pick">OpenAlex, Europe PMC, Wikipedia (+ optional Tavily / Brave / Serper)</td><td>Keyless public APIs, not scraped search engines</td></tr>
-        <tr><td>Parsing</td><td class="pick">httpx, BeautifulSoup, pypdf</td><td>HTML, full-text XML and PDF</td></tr>
-        <tr><td>Storage</td><td class="pick">SQLite &middot; Qdrant Cloud &middot; Graphiti + Neo4j</td><td>Audit ledger &middot; semantic recall &middot; relationships</td></tr>
-        <tr><td>API / UI</td><td class="pick">FastAPI &middot; vanilla JS</td><td>Background jobs the UI polls; no build step</td></tr>
-        <tr><td>Hosting</td><td class="pick">Docker on Render (512 MB) &middot; GitHub Pages &middot; HF Spaces</td><td>Free tiers end to end</td></tr>
-        <tr><td>Quality</td><td class="pick">pytest</td><td>Guards, routing and schemas tested without network</td></tr>
+        <tr><td>Orchestration</td><td class="pick">LangGraph</td><td>Explicit agents, gates and a bounded loop</td></tr>
+        <tr><td>Models</td><td class="pick">Open-weights on Groq (qwen3.8-27b, gpt-oss)</td><td>Free; swappable via an OpenAI-compatible URL</td></tr>
+        <tr><td>Discovery</td><td class="pick">OpenAlex, Europe PMC, Wikipedia</td><td>Keyless public APIs, not scraped search</td></tr>
+        <tr><td>Storage</td><td class="pick">SQLite &middot; Qdrant &middot; Graphiti + Neo4j</td><td>Audit ledger &middot; semantic search &middot; relationships</td></tr>
+        <tr><td>App</td><td class="pick">FastAPI &middot; vanilla JS</td><td>Background jobs the UI polls; no build step</td></tr>
+        <tr><td>Hosting</td><td class="pick">Docker on Render &middot; HF Spaces</td><td>Free tiers end to end</td></tr>
       </table>
     </div>
-    <span class="footnote">Every model role is an environment variable</span>
     <span class="slide-no">05 / 11</span></div>
   </section>
 
@@ -494,19 +477,17 @@
     <div class="canvas"><div class="content">
       <h2>Knowledge management and retrieval</h2>
       <table class="dt">
-        <tr><th>Store</th><th>Holds</th><th>Answers</th><th>Nairobi run</th></tr>
-        <tr><td>SQLite</td><td>Runs, sources, crawl decisions, facts, gaps, traces, metrics</td><td>&ldquo;What did the system decide, and when?&rdquo;</td><td class="pick">100 records</td></tr>
-        <tr><td>Qdrant</td><td>Evidence passages + provenance, city-filtered</td><td>&ldquo;What evidence is near my question?&rdquo;</td><td class="pick">25 facts</td></tr>
-        <tr><td>Graphiti + Neo4j</td><td>Organisations, Programmes, Policies, Indicators, Places</td><td>&ldquo;Who is connected to what, since when?&rdquo;</td><td class="pick">Built after the brief</td></tr>
+        <tr><th>Store</th><th>Answers</th><th>Hyderabad run</th></tr>
+        <tr><td>SQLite ledger</td><td>&ldquo;What did the system decide, and why?&rdquo;</td><td class="pick">50 records</td></tr>
+        <tr><td>Qdrant</td><td>&ldquo;What evidence is near my question?&rdquo;</td><td class="pick">4 findings</td></tr>
+        <tr><td>Graphiti + Neo4j</td><td>&ldquo;Who is connected to what?&rdquo;</td><td class="pick">Built in the background</td></tr>
       </table>
       <div class="flow" style="margin-top:18px">
-        <span>Question</span><i>&rarr;</i><span>Qdrant + Graphiti, concurrently</span><i>&rarr;</i><span>Rerank</span><i>&rarr;</i><span>Numbered evidence</span><i>&rarr;</i><span class="gate">Cited answer or decline</span>
+        <span>Question</span><i>&rarr;</i><span>Vectors + graph</span><i>&rarr;</i><span>Rerank</span><i>&rarr;</i><span>Answer agent</span><i>&rarr;</i><span class="gate">Cited answer or decline</span>
       </div>
       <ul class="pts">
-        <li>Citations resolve to stored records &mdash; never model memory</li>
-        <li>Collection named after the embedder: vectors from two models never mix</li>
-        <li>Idempotent point IDs: re-running a city does not duplicate evidence</li>
-        <li>Ledger is the fallback when vector or graph is unavailable</li>
+        <li>Citations resolve to stored records, never to model memory</li>
+        <li>If vectors or graph are down, the ledger still answers</li>
       </ul>
     </div>
     <span class="slide-no">06 / 11</span></div>
@@ -516,19 +497,17 @@
   <section class="slide" id="s7">
     <div class="canvas"><div class="content">
       <h2>Trustworthiness and evidence</h2>
-      <p class="small">Each fact stores: source URL + title &middot; verbatim quote &middot; geographic scope &middot; verdict &middot; verifier model &middot; confidence</p>
       <table class="dt">
-        <tr><th>Guard</th><th>Rule</th><th>Type</th><th>If it fails</th></tr>
-        <tr><td>Grounding</td><td>Quote must be found in the full source text</td><td class="pick">Mechanical</td><td>Claim discarded</td></tr>
-        <tr><td>Numeric</td><td>Every number in the claim must appear in its quote</td><td class="pick">Mechanical</td><td>UNSUPPORTED</td></tr>
-        <tr><td>Scope</td><td>National evidence &ne; city figure</td><td class="pick">Field on every fact</td><td>Published with &ldquo;not a city figure&rdquo; warning</td></tr>
-        <tr><td>Independence</td><td>Checker is never the extractor</td><td class="pick">Model routing</td><td>Withheld &rarr; gap ledger</td></tr>
-        <tr><td>Crawl</td><td>robots.txt respected</td><td class="pick">Mechanical</td><td>Source listed with reason</td></tr>
-        <tr><td>Degradation</td><td>Rules-only checking is flagged</td><td class="pick">Runtime banner</td><td>Guardrail warning, counted</td></tr>
+        <tr><th>Guard</th><th>Rule</th><th>If it fails</th></tr>
+        <tr><td>Grounding</td><td>The quote must be found in the source text</td><td>Claim discarded</td></tr>
+        <tr><td>Numbers</td><td>Every number in a claim must be in its quote</td><td>Unsupported</td></tr>
+        <tr><td>Independence</td><td>The checker never wrote the claim</td><td>Withheld &rarr; gap</td></tr>
+        <tr><td>Scope</td><td>National evidence is not a city figure</td><td>Published with a warning</td></tr>
+        <tr><td>Permission</td><td>robots.txt is respected</td><td>Not fetched, listed with reason</td></tr>
       </table>
       <div class="grid g2">
-        <div class="card"><b>Example · passes</b><strong>&ldquo;&hellip;coordinated by 12 subcounty health management teams&hellip;&rdquo;</strong><span>12 is in the quote &middot; quote located &middot; scope city</span></div>
-        <div class="card warn"><b>Illustrative · fails</b><strong>Claim says &ldquo;38% hypertension&rdquo;, quote has no 38</strong><span>Numeric guard &rarr; UNSUPPORTED, before any checker tokens are spent</span></div>
+        <div class="card"><b>Hyderabad · passed</b><strong>&ldquo;55% had hypertension&rdquo;</strong><span>22/40 and 55% both appear in the quote; marked partially supported because the sample is one hospital.</span></div>
+        <div class="card warn"><b>Hyderabad · withheld</b><strong>&ldquo;Meetings held in Hyderabad&rdquo;</strong><span>The checker read the quote: five different cities. Recorded as a gap.</span></div>
       </div>
     </div>
     <span class="slide-no">07 / 11</span></div>
@@ -538,33 +517,23 @@
   <section class="slide" id="s8">
     <div class="canvas"><div class="content">
       <h2>Evaluation</h2>
-      <p class="small">Every run reports its own quality metrics in the Admin / runtime tab. Nairobi run shown.</p>
+      <p class="small">Every run scores itself in the Admin / runtime tab. Hyderabad run shown.</p>
       <div class="stats">
-        <div class="stat"><b>96.2%</b><span>evidence coverage</span></div>
-        <div class="stat"><b>100%</b><span>city-scope quality</span></div>
-        <div class="stat"><b>4 / 5</b><span>dimensions covered</span></div>
-        <div class="stat"><b>6 / 6</b><span>guardrails passed</span></div>
+        <div class="stat"><b>80%</b><span>of claims survived checking</span></div>
+        <div class="stat"><b>100%</b><span>findings are city-level</span></div>
+        <div class="stat"><b>3 / 5</b><span>areas covered</span></div>
+        <div class="stat"><b>4 / 4</b><span>checked by a model, not rules</span></div>
       </div>
       <div class="split">
         <div>
-          <b class="label">Where the 133 s went</b>
-          <div class="stack" role="img" aria-label="Extraction 111 seconds, discovery 13, crawl gate 4, planning 3, indexing 2">
-            <i style="--w:84%" title="Extraction 111 s"></i><i class="b" style="--w:10%" title="Discovery 13 s"></i><i class="c" style="--w:3%" title="Crawl 4 s"></i><i class="d" style="--w:3%" title="Plan + index 5 s"></i>
+          <b class="label">Where the 51 s went</b>
+          <div class="stack" role="img" aria-label="Reading 32 seconds, discovery 7, fact check 5, crawl gate 3, other 5">
+            <i style="--w:63%"></i><i class="b" style="--w:13%"></i><i class="c" style="--w:9%"></i><i class="d" style="--w:15%"></i>
           </div>
-          <div class="legend"><span><i></i>Extraction 111 s</span><span><i class="b"></i>Discovery 13 s</span><span><i class="c"></i>Crawl 4 s</span><span><i class="d"></i>Plan + index 5 s</span></div>
-          <p class="small">Claims, fact check, sufficiency: &lt; 15 ms each (deterministic first).</p>
+          <div class="legend"><span><i></i>Reading 32 s</span><span><i class="b"></i>Discovery 7 s</span><span><i class="c"></i>Fact check 5 s</span><span><i class="d"></i>Crawl, plan, claims, save 8 s</span></div>
         </div>
-        <div>
-          <table class="dt">
-            <tr><th>Metric</th><th>Value</th><th>Reading</th></tr>
-            <tr><td>Verified / withheld</td><td>25 / 1</td><td>Gate is active</td></tr>
-            <tr><td>Mean confidence</td><td>0.70</td><td>Rules-verified run</td></tr>
-            <tr><td>Provider errors</td><td>0</td><td>&mdash;</td></tr>
-            <tr><td>Knowledge gaps</td><td>21</td><td>Mostly PDFs, now readable</td></tr>
-          </table>
-        </div>
+        <div class="card warn"><b>Honest reading</b><span>Grounded is not the same as representative: the burden figure is 40 surgical patients, and the brief says so. Balanced depth read only 6 of 45 permitted sources. Next: a labelled city set scored for relevance.</span></div>
       </div>
-      <div class="card warn" style="margin-top:10px"><b>Honest reading</b><span>This run had no LLM available: facts were rules-verified and the graph was skipped &mdash; and the run said so. Metrics measure grounding, not relevance: some facts are about TB and mental health rather than CVD. Next: a labelled city set scored for relevance and precision.</span></div>
     </div>
     <span class="slide-no">08 / 11</span></div>
   </section>
@@ -575,14 +544,12 @@
       <h2>Engineering decisions</h2>
       <p class="small">Trust is never traded. Time, tokens and cost are.</p>
       <table class="dt">
-        <tr><th>Decision</th><th>What</th><th>Measured effect</th></tr>
-        <tr><td>Open-weights on Groq</td><td class="pick">Free, no lock-in; replaced 3 hidden OpenAI calls in Graphiti</td><td>$0 per run</td></tr>
-        <tr><td>A model per job</td><td class="pick">Extraction rotates 3 models; checker &ne; extractor</td><td>~3.5k tokens/call within 8k/min limits</td></tr>
-        <tr><td>Deterministic first</td><td class="pick">robots, grounding, numeric guard before any model</td><td>6k relevant chars sent, not first 14k</td></tr>
-        <tr><td>Strict schemas</td><td class="pick">Schema-constrained verdicts, low reasoning effort</td><td>3&times; fewer tokens &middot; 3.4&times; faster &middot; 16/16 valid (was 5/16)</td></tr>
-        <tr><td>Rate limit &ne; outage</td><td class="pick">Shared cooldown, failover to model free soonest</td><td>Extraction 383 s &rarr; seconds</td></tr>
-        <tr><td>Brief first, graph later</td><td class="pick">Background job, UI polls</td><td>Dropped connection keeps result</td></tr>
-        <tr><td>Fit the free host</td><td class="pick">Gemini embeddings on 512 MB</td><td>Idle 394 &rarr; 182 MB &middot; peak 186 MB</td></tr>
+        <tr><th>Decision</th><th>Effect</th></tr>
+        <tr><td>Rules before models</td><td>robots.txt, quote and number checks cost no tokens</td></tr>
+        <tr><td>A model per job</td><td>Extraction rotates 3 models; checker &ne; extractor</td></tr>
+        <tr><td>Strict output schemas</td><td>3&times; fewer tokens, 3.4&times; faster, no invalid verdicts</td></tr>
+        <tr><td>Rate limit &ne; outage</td><td>Fail over to the free model; extraction 383 s &rarr; seconds</td></tr>
+        <tr><td>Brief first, graph later</td><td>The user never waits for the graph</td></tr>
       </table>
     </div>
     <span class="slide-no">09 / 11</span></div>
@@ -592,39 +559,20 @@
   <section class="slide" id="s10">
     <div class="canvas"><div class="content">
       <h2>User experience</h2>
-      <b class="label">User journey &mdash; a City Lead, not an engineer</b>
-      <div class="journey">
-        <div><b>1</b><strong>Type</strong><span>&ldquo;Nairobi, Kenya&rdquo;</span></div>
-        <div><b>2</b><strong>Choose depth</strong><span>Quick / Balanced / Thorough</span></div>
-        <div><b>3</b><strong>Watch</strong><span>&ldquo;4 of 10 sources&rdquo;, bar never goes back</span></div>
-        <div><b>4</b><strong>Read</strong><span>Findings and gaps side by side</span></div>
-        <div><b>5</b><strong>Drill in</strong><span>Quote, scope, verifier</span></div>
-        <div><b>6</b><strong>Ask</strong><span>Cited answers; explore graph</span></div>
-        <div><b>7</b><strong>Take away</strong><span>Download brief; history accumulates</span></div>
+      <b class="label">A City Lead, not an engineer</b>
+      <div class="journey" style="grid-template-columns:repeat(5,1fr)">
+        <div><b>1</b><strong>Type</strong><span>&ldquo;Hyderabad, India&rdquo;</span></div>
+        <div><b>2</b><strong>Pick depth</strong><span>Quick, Balanced, Thorough</span></div>
+        <div><b>3</b><strong>Watch</strong><span>10 steps in 4 plain phases</span></div>
+        <div><b>4</b><strong>Check</strong><span>Each finding opens to its quote</span></div>
+        <div><b>5</b><strong>Ask &amp; take away</strong><span>Cited Q&amp;A, downloadable brief</span></div>
       </div>
-      <div class="split">
-        <div>
-          <b class="label">Depth options</b>
-          <table class="dt">
-            <tr><th>Depth</th><th>Sources</th><th>Rounds</th><th>Time</th></tr>
-            <tr><td>Quick</td><td>5</td><td>1</td><td class="pick"><strong>42 s measured</strong></td></tr>
-            <tr><td>Balanced</td><td>8 (6 + 2)</td><td>up to 2</td><td class="pick">~2&ndash;4 min est.</td></tr>
-            <tr><td>Thorough</td><td>12 (9 + 3)</td><td>up to 2</td><td class="pick">~4&ndash;8 min est.</td></tr>
-          </table>
-        </div>
-        <div>
-          <b class="label">Workspace tabs</b>
-          <table class="dt">
-            <tr><th>Tab</th><th>Shows</th></tr>
-            <tr><td>Overview</td><td>Brief by dimension + gap ledger</td></tr>
-            <tr><td>Evidence</td><td>Each fact with quote, scope, verifier</td></tr>
-            <tr><td>Ask the brief</td><td>Q&amp;A with citations</td></tr>
-            <tr><td>Knowledge graph</td><td>Entities and relationships</td></tr>
-            <tr><td>History</td><td>Earlier runs, cumulative</td></tr>
-            <tr><td>Admin / runtime</td><td>Metrics, guardrails, capability</td></tr>
-          </table>
-        </div>
-      </div>
+      <table class="dt" style="margin-top:18px">
+        <tr><th>Depth</th><th>Sources read</th><th>Rounds</th><th>Time</th></tr>
+        <tr><td>Quick</td><td>5</td><td>1</td><td class="pick">42 s measured</td></tr>
+        <tr><td>Balanced</td><td>up to 8</td><td>up to 2</td><td class="pick">51 s measured (Hyderabad, 1 round)</td></tr>
+        <tr><td>Thorough</td><td>up to 12</td><td>up to 2</td><td class="pick">~4&ndash;8 min est.</td></tr>
+      </table>
     </div>
     <span class="slide-no">10 / 11</span></div>
   </section>
@@ -634,17 +582,15 @@
     <div class="canvas"><div class="content">
       <h2>Trade-offs and limitations</h2>
       <table class="dt">
-        <tr><th>Area</th><th>Current state</th><th>Impact</th><th>Next</th></tr>
-        <tr><td>Cut</td><td>Human review, OCR, authentication</td><td>Scanned PDFs flagged, not read</td><td class="pick">Review queue, OCR, auth</td></tr>
-        <tr><td>Free tiers</td><td>Rate limits; app sleeps when idle</td><td>Slow first request; extraction dominates time</td><td class="pick">Paid tier</td></tr>
-        <tr><td>Storage</td><td>SQLite on ephemeral disk</td><td>History resets on restart (vectors, graph persist)</td><td class="pick">PostgreSQL</td></tr>
-        <tr><td>Conflicts</td><td>Disagreeing sources both shown</td><td>User adjudicates</td><td class="pick">Contradiction detection</td></tr>
-        <tr><td>Relevance</td><td>Grounded &ne; on-topic</td><td>Some off-topic facts (Nairobi)</td><td class="pick">Cross-encoder reranker, eval set</td></tr>
-        <tr><td>Discovery</td><td>Academic APIs by default</td><td>Government pages thin without a search key</td><td class="pick">Configure web search</td></tr>
+        <tr><th>Limitation</th><th>Impact</th><th>Next</th></tr>
+        <tr><td>No web-search key</td><td>Government and policy pages thin</td><td class="pick">Configure Tavily / Brave</td></tr>
+        <tr><td>Grounded &ne; relevant</td><td>Hospital samples read as city evidence</td><td class="pick">Reranker, evaluation set</td></tr>
+        <tr><td>Free tiers</td><td>Rate limits; app sleeps when idle</td><td class="pick">Paid tier</td></tr>
+        <tr><td>SQLite, no auth</td><td>History resets; single user</td><td class="pick">PostgreSQL, authentication</td></tr>
       </table>
       <b class="label" style="margin-top:18px">Demo path</b>
       <div class="flow">
-        <span>Unseen city</span><i>&rarr;</i><span>Depth</span><i>&rarr;</i><span>Workflow</span><i>&rarr;</i><span>Finding &rarr; quote</span><i>&rarr;</i><span class="gate">Gaps</span><i>&rarr;</i><span>Graph</span><i>&rarr;</i><span>Ask</span><i>&rarr;</i><span>Download</span>
+        <span>Unseen city</span><i>&rarr;</i><span>Watch the agents</span><i>&rarr;</i><span>Finding &rarr; quote</span><i>&rarr;</i><span class="gate">Open questions</span><i>&rarr;</i><span>Graph</span><i>&rarr;</i><span>Ask</span><i>&rarr;</i><span>Download</span>
       </div>
     </div>
     <span class="slide-no">11 / 11</span></div>

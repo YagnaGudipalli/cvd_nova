@@ -315,9 +315,9 @@ cycle the documentation claims.
 
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — system design and trade-offs
 - [frontend/architecture.html](frontend/architecture.html) — architecture overview with diagrams (served at `/architecture.html`)
-- [frontend/presentation.html](frontend/presentation.html) — 8-slide demonstration deck (served at `/presentation.html`)
-- [docs/examples/nairobi-cardio4cities-brief.html](docs/examples/nairobi-cardio4cities-brief.html) — a completed city brief
-- [docs/examples/nairobi-research-run.json](docs/examples/nairobi-research-run.json) — the full run record behind it
+- [frontend/presentation.html](frontend/presentation.html) — 11-slide demonstration deck (served at `/presentation.html`)
+- [docs/examples/hyderabad-cardio4cities-brief.html](docs/examples/hyderabad-cardio4cities-brief.html) — a completed city brief
+- [docs/examples/hyderabad-research-run.json](docs/examples/hyderabad-research-run.json) — the full run record behind it
 
 ---
 
