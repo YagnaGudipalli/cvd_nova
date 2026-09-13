@@ -38,6 +38,7 @@
       border-bottom: 1px solid var(--line);
       padding-bottom: 20px;
     }
+    .masthead nav { display: flex; gap: 18px; }
 
     .eyebrow, .label, .mono { font: 500 11px 'DM Mono', monospace; letter-spacing: 0; text-transform: uppercase; }
     .eyebrow { color: var(--green); }
@@ -66,12 +67,7 @@
     .section-note { color: var(--muted); font-size: .9rem; max-width: 68ch; margin: 14px 0 24px; }
     p { margin: 0 0 14px; }
 
-    .runline {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 8px;
-    }
+    .runline { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
     .runline span {
       border: 1px solid var(--line);
       background: #fff;
@@ -81,52 +77,50 @@
       color: var(--muted);
     }
 
+    .toc { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 28px 0 0; padding: 14px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    .toc a { color: var(--muted); text-decoration: none; font: 500 10px 'DM Mono', monospace; text-transform: uppercase; }
+    .toc a:hover { color: var(--green); }
+
     figure { margin: 0 0 8px; }
-    .figure-frame {
-      border: 1px solid var(--line);
-      background: #fff;
-      padding: 18px;
-      overflow-x: auto;
-    }
-    .figure-frame svg { display: block; width: 100%; min-width: 620px; height: auto; }
+    .figure-frame { border: 1px solid var(--line); background: #fff; padding: 18px; overflow-x: auto; }
+    .figure-frame svg { display: block; width: 100%; min-width: 640px; height: auto; }
     figcaption { color: var(--muted); font: 500 10px 'DM Mono', monospace; text-transform: uppercase; margin-top: 10px; }
 
     .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 20px 0; }
     .grid-2 { grid-template-columns: repeat(2, 1fr); }
     .card { border: 1px solid var(--line); border-top: 3px solid var(--green); background: #fff; padding: 16px; }
+    .card.warn { border-top-color: var(--coral); }
     .card .label { display: block; color: var(--green); margin-bottom: 10px; }
+    .card.warn .label { color: var(--coral); }
     .card p { color: var(--muted); font-size: .88rem; line-height: 1.55; margin: 0; }
     .card p + p { margin-top: 10px; }
 
     table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: .88rem; }
     th, td { text-align: left; vertical-align: top; padding: 12px 14px; border-bottom: 1px solid var(--line); }
     th { font: 500 10px 'DM Mono', monospace; text-transform: uppercase; color: var(--green); background: #fff; }
-    td strong { display: block; margin-bottom: 4px; }
+    td strong { display: block; margin-bottom: 4px; color: var(--ink); }
     td { color: var(--muted); }
+    td code, p code, li code { font: 500 .8em 'DM Mono', monospace; color: var(--ink); background: #eef3ef; padding: 1px 4px; }
     .table-wrap { overflow-x: auto; }
 
-    .callout {
-      border-left: 4px solid var(--coral);
-      background: #fff;
-      padding: 16px 20px;
-      margin: 24px 0;
-      font-size: .95rem;
-    }
+    .callout { border-left: 4px solid var(--coral); background: #fff; padding: 16px 20px; margin: 24px 0; font-size: .95rem; }
     .callout strong { color: var(--ink); }
 
     ol.steps { counter-reset: step; list-style: none; padding: 0; margin: 20px 0; }
     ol.steps li {
       counter-increment: step;
-      display: grid;
-      grid-template-columns: 34px 1fr;
-      gap: 14px;
-      padding: 14px 0;
+      position: relative;
+      padding: 14px 0 14px 48px;
+      min-height: 56px;
       border-bottom: 1px solid var(--line);
       font-size: .92rem;
       color: var(--muted);
     }
     ol.steps li::before {
       content: counter(step, decimal-leading-zero);
+      position: absolute;
+      left: 0;
+      top: 12px;
       display: grid;
       place-items: center;
       width: 28px;
@@ -141,12 +135,12 @@
     ul.plain li { margin-bottom: 10px; }
     ul.plain strong { color: var(--ink); }
 
-    .honest {
-      border: 1px solid #eedb9b;
-      background: #fffbef;
-      padding: 18px 20px;
-      margin: 24px 0;
-    }
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 20px 0; }
+    .stat { background: #fff; border: 1px solid var(--line); padding: 14px 16px; }
+    .stat b { display: block; font-size: 1.6rem; letter-spacing: -1px; line-height: 1.1; color: var(--ink); }
+    .stat span { display: block; color: var(--muted); font-size: .8rem; line-height: 1.4; margin-top: 6px; }
+
+    .honest { border: 1px solid #eedb9b; background: #fffbef; padding: 18px 20px; margin: 24px 0; }
     .honest .label { color: #946b00; display: block; margin-bottom: 10px; }
     .honest ul { padding-left: 18px; margin: 0; color: var(--muted); font-size: .9rem; }
     .honest li { margin-bottom: 8px; }
@@ -156,6 +150,7 @@
 
     @media (max-width: 760px) {
       .grid, .grid-2 { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: repeat(2, 1fr); }
       .masthead { align-items: flex-start; flex-direction: column; gap: 10px; }
       h1 { margin-top: 36px; }
     }
@@ -166,21 +161,37 @@
 
   <header class="masthead">
     <span class="eyebrow">CARDIO4Cities / architecture overview</span>
-    <a class="back" href="index.html">Back to workspace &rarr;</a>
+    <nav>
+      <a class="back" href="presentation.html">Deck</a>
+      <a class="back" href="index.html">Back to workspace &rarr;</a>
+    </nav>
   </header>
 
   <h1>Evidence before confidence.</h1>
-  <p class="lede">A city research workspace that turns live public sources into a source-traceable brief &mdash; and refuses to publish anything it cannot quote.</p>
+  <p class="lede">A city research workspace that turns live public sources into a source-traceable brief &mdash; and refuses to publish anything it cannot locate in a source and have independently checked.</p>
   <div class="runline">
-    <span>FastAPI</span><span>LangGraph</span><span>SQLite ledger</span><span>Qdrant</span><span>Graphiti + Neo4j Sandbox</span><span>Static frontend</span>
+    <span>FastAPI</span><span>LangGraph &middot; 10 nodes</span><span>Groq &middot; open-weights models</span><span>SQLite ledger</span><span>Qdrant</span><span>Graphiti + Neo4j</span><span>Docker &middot; Render / HF Spaces</span>
   </div>
 
-  <h2>System context</h2>
-  <p class="section-note">One deployed service. The frontend, the orchestration graph and the API share a process; all durable knowledge lives outside it, because the free hosting tier has ephemeral disk and sleeps when idle.</p>
+  <nav class="toc" aria-label="Sections">
+    <a href="#context">System context</a>
+    <a href="#workflow">Agent workflow</a>
+    <a href="#guards">Fabrication guards</a>
+    <a href="#models">Model routing</a>
+    <a href="#throughput">Throughput and resilience</a>
+    <a href="#data">Data architecture</a>
+    <a href="#retrieval">Retrieval</a>
+    <a href="#deploy">Deployment</a>
+    <a href="#degradation">Degradation</a>
+    <a href="#tradeoffs">Trade-offs</a>
+  </nav>
+
+  <h2 id="context">System context</h2>
+  <p class="section-note">One deployed container serves the API and the frontend. Every model call goes through a single boundary that owns pacing, failover and fallback. Durable knowledge lives in hosted stores, because the free hosting tier has an ephemeral disk and sleeps when idle.</p>
 
   <figure>
     <div class="figure-frame">
-      <svg viewBox="0 0 980 566" role="img" aria-label="Layered system diagram: browser UI, FastAPI endpoints, LangGraph orchestration, three datastores, and external services.">
+      <svg viewBox="0 0 980 676" role="img" aria-label="Layered system diagram: browser UI, FastAPI endpoints, LangGraph orchestration, model boundary, three datastores, and external services.">
         <defs>
           <marker id="arw" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
             <path d="M0 0 L9 4.5 L0 9 z" fill="#1b7654" />
@@ -189,110 +200,131 @@
         <g font-family="'DM Mono', monospace" font-size="10" fill="#687575" text-anchor="end">
           <text x="108" y="45">PRESENTATION</text>
           <text x="108" y="128">API</text>
-          <text x="108" y="248">ORCHESTRATION</text>
-          <text x="108" y="380">STATE</text>
-          <text x="108" y="500">EXTERNAL</text>
+          <text x="108" y="238">ORCHESTRATION</text>
+          <text x="108" y="344">MODEL BOUNDARY</text>
+          <text x="108" y="460">STATE</text>
+          <text x="108" y="590">EXTERNAL</text>
         </g>
 
         <!-- Presentation -->
         <rect x="124" y="16" width="836" height="50" fill="#ffffff" stroke="#d8e0dc" />
-        <text x="144" y="38" font-family="Manrope, sans-serif" font-size="14" font-weight="700" fill="#172222">Intelligence Studio UI</text>
-        <text x="144" y="56" font-family="Manrope, sans-serif" font-size="12" fill="#687575">Workflow trace &middot; evidence ledger &middot; knowledge gaps &middot; graph view &middot; Q&amp;A &middot; report download</text>
+        <text x="144" y="38" font-family="Manrope, sans-serif" font-size="14" font-weight="700" fill="#172222">Intelligence Studio UI &mdash; static, no build step</text>
+        <text x="144" y="56" font-family="Manrope, sans-serif" font-size="12" fill="#687575">Depth choice &middot; live progress &middot; findings &amp; gaps &middot; evidence &middot; graph &middot; Q&amp;A &middot; history &middot; runtime. Served by FastAPI or GitHub Pages.</text>
 
         <line x1="542" y1="66" x2="542" y2="92" stroke="#1b7654" stroke-width="1.5" marker-end="url(#arw)" />
 
         <!-- API -->
         <rect x="124" y="98" width="836" height="76" fill="#ffffff" stroke="#d8e0dc" />
-        <text x="144" y="120" font-family="Manrope, sans-serif" font-size="13" font-weight="700" fill="#172222">FastAPI application</text>
+        <text x="144" y="120" font-family="Manrope, sans-serif" font-size="13" font-weight="700" fill="#172222">FastAPI application &mdash; research runs as a background job the UI polls</text>
         <g font-family="'DM Mono', monospace" font-size="9.5" fill="#1b7654">
           <rect x="140" y="130" width="150" height="28" fill="#d8f3df" />
           <text x="150" y="148">POST /api/research</text>
           <rect x="300" y="130" width="150" height="28" fill="#d8f3df" />
-          <text x="310" y="148">POST /api/ask</text>
+          <text x="310" y="148">GET /api/progress</text>
           <rect x="460" y="130" width="150" height="28" fill="#d8f3df" />
-          <text x="470" y="148">GET /api/report</text>
+          <text x="470" y="148">POST /api/ask</text>
           <rect x="620" y="130" width="150" height="28" fill="#d8f3df" />
-          <text x="630" y="148">GET /api/graph</text>
+          <text x="630" y="148">GET /api/workflow</text>
           <rect x="780" y="130" width="164" height="28" fill="#d8f3df" />
-          <text x="790" y="148">GET /api/stores</text>
+          <text x="790" y="148">GET /api/runtime</text>
         </g>
 
-        <line x1="542" y1="174" x2="542" y2="200" stroke="#1b7654" stroke-width="1.5" marker-end="url(#arw)" />
+        <line x1="542" y1="174" x2="542" y2="196" stroke="#1b7654" stroke-width="1.5" marker-end="url(#arw)" />
 
         <!-- Orchestration -->
-        <rect x="124" y="206" width="836" height="96" fill="#ffffff" stroke="#172222" stroke-width="1.5" />
-        <text x="144" y="228" font-family="Manrope, sans-serif" font-size="13" font-weight="700" fill="#172222">LangGraph StateGraph</text>
-        <text x="144" y="245" font-family="Manrope, sans-serif" font-size="11.5" fill="#687575">Compiled at import time. Every stage writes a trace event with a status and a duration.</text>
+        <rect x="124" y="202" width="836" height="84" fill="#ffffff" stroke="#172222" stroke-width="1.5" />
+        <text x="144" y="224" font-family="Manrope, sans-serif" font-size="13" font-weight="700" fill="#172222">LangGraph StateGraph &mdash; 10 nodes, one bounded cycle</text>
         <g font-family="'DM Mono', monospace" font-size="9" fill="#172222">
-          <rect x="140" y="258" width="118" height="30" fill="#f5f7f2" stroke="#d8e0dc" />
-          <text x="150" y="277">intake &rarr; plan</text>
-          <rect x="270" y="258" width="118" height="30" fill="#f5f7f2" stroke="#d8e0dc" />
-          <text x="280" y="277">discovery</text>
-          <rect x="400" y="258" width="118" height="30" fill="#fff0d0" stroke="#eedb9b" />
-          <text x="410" y="277">crawl gate</text>
-          <rect x="530" y="258" width="118" height="30" fill="#f5f7f2" stroke="#d8e0dc" />
-          <text x="540" y="277">extraction</text>
-          <rect x="660" y="258" width="118" height="30" fill="#fff0d0" stroke="#eedb9b" />
-          <text x="670" y="277">fact check</text>
-          <rect x="790" y="258" width="154" height="30" fill="#f5f7f2" stroke="#d8e0dc" />
-          <text x="800" y="277">index &rarr; report</text>
+          <rect x="140" y="240" width="92" height="30" fill="#f5f7f2" stroke="#d8e0dc" />
+          <text x="150" y="259">intake&rarr;plan</text>
+          <rect x="240" y="240" width="76" height="30" fill="#f5f7f2" stroke="#d8e0dc" />
+          <text x="250" y="259">discover</text>
+          <rect x="324" y="240" width="90" height="30" fill="#fff0d0" stroke="#eedb9b" />
+          <text x="334" y="259">crawl_gate</text>
+          <rect x="422" y="240" width="70" height="30" fill="#f5f7f2" stroke="#d8e0dc" />
+          <text x="432" y="259">extract</text>
+          <rect x="500" y="240" width="80" height="30" fill="#f5f7f2" stroke="#d8e0dc" />
+          <text x="510" y="259">claims</text>
+          <rect x="588" y="240" width="90" height="30" fill="#fff0d0" stroke="#eedb9b" />
+          <text x="598" y="259">fact_check</text>
+          <rect x="686" y="240" width="100" height="30" fill="#fff0d0" stroke="#eedb9b" />
+          <text x="696" y="259">sufficiency</text>
+          <rect x="794" y="240" width="150" height="30" fill="#f5f7f2" stroke="#d8e0dc" />
+          <text x="804" y="259">index&rarr;report</text>
         </g>
 
-        <line x1="542" y1="302" x2="542" y2="330" stroke="#1b7654" stroke-width="1.5" marker-end="url(#arw)" />
+        <line x1="542" y1="286" x2="542" y2="308" stroke="#1b7654" stroke-width="1.5" marker-end="url(#arw)" />
+
+        <!-- Model boundary -->
+        <rect x="124" y="314" width="836" height="70" fill="#ffffff" stroke="#d8e0dc" />
+        <text x="144" y="336" font-family="Manrope, sans-serif" font-size="13" font-weight="700" fill="#172222">llm.py &mdash; every model call passes through here</text>
+        <text x="144" y="356" font-family="Manrope, sans-serif" font-size="11.5" fill="#687575">Per-model pacing and shared cooldown &middot; extraction model pool with failover &middot; throttle vs. quota classification</text>
+        <text x="144" y="373" font-family="Manrope, sans-serif" font-size="11.5" fill="#687575">Half-open circuit breakers (chat and embeddings separately) &middot; deterministic fallback, counted and reported</text>
+
+        <line x1="542" y1="384" x2="542" y2="410" stroke="#1b7654" stroke-width="1.5" marker-end="url(#arw)" />
 
         <!-- State -->
         <g>
-          <rect x="124" y="336" width="268" height="86" fill="#ffffff" stroke="#d8e0dc" stroke-width="1.5" />
-          <text x="140" y="358" font-family="'DM Mono', monospace" font-size="9.5" fill="#1b7654">RELATIONAL</text>
-          <text x="140" y="378" font-family="Manrope, sans-serif" font-size="13" font-weight="700" fill="#172222">SQLite run ledger</text>
-          <text x="140" y="398" font-family="Manrope, sans-serif" font-size="11" fill="#687575">Runs, sources, crawl decisions,</text>
-          <text x="140" y="412" font-family="Manrope, sans-serif" font-size="11" fill="#687575">facts, gaps, guardrails, metrics.</text>
+          <rect x="124" y="416" width="268" height="86" fill="#ffffff" stroke="#d8e0dc" stroke-width="1.5" />
+          <text x="140" y="438" font-family="'DM Mono', monospace" font-size="9.5" fill="#1b7654">RELATIONAL</text>
+          <text x="140" y="458" font-family="Manrope, sans-serif" font-size="13" font-weight="700" fill="#172222">SQLite run ledger</text>
+          <text x="140" y="478" font-family="Manrope, sans-serif" font-size="11" fill="#687575">Runs, sources, crawl decisions,</text>
+          <text x="140" y="492" font-family="Manrope, sans-serif" font-size="11" fill="#687575">facts, gaps, guardrails, traces.</text>
 
-          <rect x="408" y="336" width="268" height="86" fill="#ffffff" stroke="#d8e0dc" stroke-width="1.5" />
-          <text x="424" y="358" font-family="'DM Mono', monospace" font-size="9.5" fill="#1b7654">VECTOR</text>
-          <text x="424" y="378" font-family="Manrope, sans-serif" font-size="13" font-weight="700" fill="#172222">Qdrant Cloud</text>
-          <text x="424" y="398" font-family="Manrope, sans-serif" font-size="11" fill="#687575">Evidence passages, embedded,</text>
-          <text x="424" y="412" font-family="Manrope, sans-serif" font-size="11" fill="#687575">filtered by research city.</text>
+          <rect x="408" y="416" width="268" height="86" fill="#ffffff" stroke="#d8e0dc" stroke-width="1.5" />
+          <text x="424" y="438" font-family="'DM Mono', monospace" font-size="9.5" fill="#1b7654">VECTOR</text>
+          <text x="424" y="458" font-family="Manrope, sans-serif" font-size="13" font-weight="700" fill="#172222">Qdrant Cloud</text>
+          <text x="424" y="478" font-family="Manrope, sans-serif" font-size="11" fill="#687575">Verified evidence, city-filtered.</text>
+          <text x="424" y="492" font-family="Manrope, sans-serif" font-size="11" fill="#687575">Collection named by embedder.</text>
 
-          <rect x="692" y="336" width="268" height="86" fill="#ffffff" stroke="#d8e0dc" stroke-width="1.5" />
-          <text x="708" y="358" font-family="'DM Mono', monospace" font-size="9.5" fill="#1b7654">GRAPH</text>
-          <text x="708" y="378" font-family="Manrope, sans-serif" font-size="13" font-weight="700" fill="#172222">Graphiti &rarr; Neo4j Sandbox</text>
-          <text x="708" y="398" font-family="Manrope, sans-serif" font-size="11" fill="#687575">Entities and relationships,</text>
-          <text x="708" y="412" font-family="Manrope, sans-serif" font-size="11" fill="#687575">grouped per city, queried live.</text>
+          <rect x="692" y="416" width="268" height="86" fill="#ffffff" stroke="#d8e0dc" stroke-width="1.5" />
+          <text x="708" y="438" font-family="'DM Mono', monospace" font-size="9.5" fill="#1b7654">GRAPH</text>
+          <text x="708" y="458" font-family="Manrope, sans-serif" font-size="13" font-weight="700" fill="#172222">Graphiti &rarr; Neo4j</text>
+          <text x="708" y="478" font-family="Manrope, sans-serif" font-size="11" fill="#687575">Typed entities per city, built in</text>
+          <text x="708" y="492" font-family="Manrope, sans-serif" font-size="11" fill="#687575">the background after the brief.</text>
         </g>
 
-        <line x1="542" y1="422" x2="542" y2="450" stroke="#1b7654" stroke-width="1.5" marker-end="url(#arw)" />
+        <line x1="542" y1="502" x2="542" y2="530" stroke="#1b7654" stroke-width="1.5" marker-end="url(#arw)" />
 
         <!-- External -->
         <g>
-          <rect x="124" y="456" width="268" height="72" fill="#f5f7f2" stroke="#d8e0dc" stroke-dasharray="4 3" />
-          <text x="140" y="480" font-family="Manrope, sans-serif" font-size="12.5" font-weight="700" fill="#172222">Public search</text>
-          <text x="140" y="500" font-family="Manrope, sans-serif" font-size="11" fill="#687575">Query-time discovery. Nothing</text>
-          <text x="140" y="514" font-family="Manrope, sans-serif" font-size="11" fill="#687575">about a city is pre-seeded.</text>
+          <rect x="124" y="536" width="199" height="86" fill="#f5f7f2" stroke="#d8e0dc" stroke-dasharray="4 3" />
+          <text x="138" y="558" font-family="Manrope, sans-serif" font-size="12.5" font-weight="700" fill="#172222">Discovery APIs</text>
+          <text x="138" y="578" font-family="Manrope, sans-serif" font-size="10.5" fill="#687575">OpenAlex, Europe PMC,</text>
+          <text x="138" y="593" font-family="Manrope, sans-serif" font-size="10.5" fill="#687575">Wikipedia (keyless); optional</text>
+          <text x="138" y="608" font-family="Manrope, sans-serif" font-size="10.5" fill="#687575">Tavily / Brave / Serper.</text>
 
-          <rect x="408" y="456" width="268" height="72" fill="#f5f7f2" stroke="#d8e0dc" stroke-dasharray="4 3" />
-          <text x="424" y="480" font-family="Manrope, sans-serif" font-size="12.5" font-weight="700" fill="#172222">Source websites</text>
-          <text x="424" y="500" font-family="Manrope, sans-serif" font-size="11" fill="#687575">Fetched only after robots.txt</text>
-          <text x="424" y="514" font-family="Manrope, sans-serif" font-size="11" fill="#687575">has been read and honoured.</text>
+          <rect x="335" y="536" width="199" height="86" fill="#f5f7f2" stroke="#d8e0dc" stroke-dasharray="4 3" />
+          <text x="349" y="558" font-family="Manrope, sans-serif" font-size="12.5" font-weight="700" fill="#172222">Source websites</text>
+          <text x="349" y="578" font-family="Manrope, sans-serif" font-size="10.5" fill="#687575">HTML, XML and PDF. Fetched</text>
+          <text x="349" y="593" font-family="Manrope, sans-serif" font-size="10.5" fill="#687575">only after robots.txt allows;</text>
+          <text x="349" y="608" font-family="Manrope, sans-serif" font-size="10.5" fill="#687575">crawl-delay honoured per host.</text>
 
-          <rect x="692" y="456" width="268" height="72" fill="#f5f7f2" stroke="#d8e0dc" stroke-dasharray="4 3" />
-          <text x="708" y="480" font-family="Manrope, sans-serif" font-size="12.5" font-weight="700" fill="#172222">LLM provider</text>
-          <text x="708" y="500" font-family="Manrope, sans-serif" font-size="11" fill="#687575">Embeddings and Graphiti entity</text>
-          <text x="708" y="514" font-family="Manrope, sans-serif" font-size="11" fill="#687575">extraction. Degrades visibly.</text>
+          <rect x="546" y="536" width="199" height="86" fill="#f5f7f2" stroke="#d8e0dc" stroke-dasharray="4 3" />
+          <text x="560" y="558" font-family="Manrope, sans-serif" font-size="12.5" font-weight="700" fill="#172222">Generation provider</text>
+          <text x="560" y="578" font-family="Manrope, sans-serif" font-size="10.5" fill="#687575">Groq, OpenAI-compatible API.</text>
+          <text x="560" y="593" font-family="Manrope, sans-serif" font-size="10.5" fill="#687575">Swappable for Ollama, vLLM</text>
+          <text x="560" y="608" font-family="Manrope, sans-serif" font-size="10.5" fill="#687575">or OpenAI by one URL.</text>
+
+          <rect x="757" y="536" width="203" height="86" fill="#f5f7f2" stroke="#d8e0dc" stroke-dasharray="4 3" />
+          <text x="771" y="558" font-family="Manrope, sans-serif" font-size="12.5" font-weight="700" fill="#172222">Embeddings</text>
+          <text x="771" y="578" font-family="Manrope, sans-serif" font-size="10.5" fill="#687575">In-process bge-small (local),</text>
+          <text x="771" y="593" font-family="Manrope, sans-serif" font-size="10.5" fill="#687575">or hosted API with its own key</text>
+          <text x="771" y="608" font-family="Manrope, sans-serif" font-size="10.5" fill="#687575">on the 512 MB tier.</text>
         </g>
 
-        <text x="124" y="552" font-family="'DM Mono', monospace" font-size="9" fill="#9aa6a1">Solid border = inside the deployed service &middot; dashed = third party reached at request time</text>
+        <text x="124" y="652" font-family="'DM Mono', monospace" font-size="9" fill="#9aa6a1">Solid border = inside the deployed service &middot; dashed = third party reached at request time</text>
       </svg>
     </div>
     <figcaption>Figure 1 &mdash; Request path and state ownership</figcaption>
   </figure>
 
-  <h2>Agent workflow</h2>
-  <p class="section-note">Responsibility is split so that no agent can both produce a claim and bless it. Two stages are gates rather than steps: they can remove work from the pipeline, and what they remove is recorded rather than discarded.</p>
+  <h2 id="workflow">Agent workflow</h2>
+  <p class="section-note">Ten LangGraph nodes, each with one responsibility. <code>GET /api/workflow</code> renders the structure from the compiled graph, so the diagram in the UI cannot drift from the code that runs. Three nodes are gates: they remove work, and what they remove is recorded as a gap.</p>
 
   <figure>
     <div class="figure-frame">
-      <svg viewBox="0 0 900 668" role="img" aria-label="Vertical agent workflow with branch outcomes for the crawlability gate, extraction failures and the fact check.">
+      <svg viewBox="0 0 900 690" role="img" aria-label="Vertical agent workflow of ten nodes with refusal branches and the sufficiency loop back to planning.">
         <defs>
           <marker id="arw2" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
             <path d="M0 0 L9 4.5 L0 9 z" fill="#1b7654" />
@@ -303,84 +335,176 @@
         </defs>
 
         <g font-family="Manrope, sans-serif">
-          <!-- 01 -->
-          <rect x="60" y="16" width="360" height="54" fill="#ffffff" stroke="#d8e0dc" />
-          <text x="78" y="38" font-size="13" font-weight="700" fill="#172222">01 &nbsp; Intake and guardrails</text>
-          <text x="78" y="57" font-size="11" fill="#687575">Validates the target, declares geographic scope.</text>
-          <line x1="240" y1="70" x2="240" y2="90" stroke="#1b7654" stroke-width="1.5" marker-end="url(#arw2)" />
+          <!-- 01 intake -->
+          <rect x="90" y="16" width="360" height="46" fill="#ffffff" stroke="#d8e0dc" />
+          <text x="108" y="35" font-size="12.5" font-weight="700" fill="#172222">01 &nbsp; intake</text>
+          <text x="108" y="52" font-size="10.5" fill="#687575">Validates the target, declares six guardrails.</text>
+          <line x1="270" y1="62" x2="270" y2="74" stroke="#1b7654" stroke-width="1.5" marker-end="url(#arw2)" />
 
-          <!-- 02 -->
-          <rect x="60" y="94" width="360" height="54" fill="#ffffff" stroke="#d8e0dc" />
-          <text x="78" y="116" font-size="13" font-weight="700" fill="#172222">02 &nbsp; Research planner</text>
-          <text x="78" y="135" font-size="11" fill="#687575">Expands the city into scoped topic queries.</text>
-          <line x1="240" y1="148" x2="240" y2="168" stroke="#1b7654" stroke-width="1.5" marker-end="url(#arw2)" />
+          <!-- 02 plan -->
+          <rect x="90" y="78" width="360" height="46" fill="#ffffff" stroke="#d8e0dc" />
+          <text x="108" y="97" font-size="12.5" font-weight="700" fill="#172222">02 &nbsp; plan</text>
+          <text x="108" y="114" font-size="10.5" fill="#687575">Dimension-scoped queries (fast model, seed-term fallback).</text>
+          <line x1="270" y1="124" x2="270" y2="136" stroke="#1b7654" stroke-width="1.5" marker-end="url(#arw2)" />
 
-          <!-- 03 -->
-          <rect x="60" y="172" width="360" height="54" fill="#ffffff" stroke="#d8e0dc" />
-          <text x="78" y="194" font-size="13" font-weight="700" fill="#172222">03 &nbsp; Source discovery</text>
-          <text x="78" y="213" font-size="11" fill="#687575">Live public search, de-duplicated by URL.</text>
-          <line x1="240" y1="226" x2="240" y2="246" stroke="#1b7654" stroke-width="1.5" marker-end="url(#arw2)" />
+          <!-- 03 discover -->
+          <rect x="90" y="140" width="360" height="46" fill="#ffffff" stroke="#d8e0dc" />
+          <text x="108" y="159" font-size="12.5" font-weight="700" fill="#172222">03 &nbsp; discover</text>
+          <text x="108" y="176" font-size="10.5" fill="#687575">Public APIs at request time, ranked by source authority.</text>
+          <line x1="270" y1="186" x2="270" y2="198" stroke="#1b7654" stroke-width="1.5" marker-end="url(#arw2)" />
 
-          <!-- 04 gate -->
-          <rect x="60" y="250" width="360" height="54" fill="#fff8e4" stroke="#eedb9b" stroke-width="1.5" />
-          <text x="78" y="272" font-size="13" font-weight="700" fill="#172222">04 &nbsp; Crawlability gate</text>
-          <text x="78" y="291" font-size="11" fill="#687575">Reads robots.txt before a single page is fetched.</text>
-          <path d="M420 277 L520 277" stroke="#ed765c" stroke-width="1.5" fill="none" marker-end="url(#arw3)" />
-          <rect x="530" y="250" width="310" height="54" fill="#ffffff" stroke="#ed765c" />
-          <text x="548" y="272" font-size="12" font-weight="700" fill="#172222">Disallowed &rarr; never fetched</text>
-          <text x="548" y="291" font-size="11" fill="#687575">Source stays listed with its refusal reason.</text>
-          <line x1="240" y1="304" x2="240" y2="324" stroke="#1b7654" stroke-width="1.5" marker-end="url(#arw2)" />
+          <!-- 04 crawl gate -->
+          <rect x="90" y="202" width="360" height="46" fill="#fff8e4" stroke="#eedb9b" stroke-width="1.5" />
+          <text x="108" y="221" font-size="12.5" font-weight="700" fill="#172222">04 &nbsp; crawl_gate</text>
+          <text x="108" y="238" font-size="10.5" fill="#687575">RFC 9309 robots.txt decision before any fetch.</text>
+          <path d="M450 225 L530 225" stroke="#ed765c" stroke-width="1.5" fill="none" marker-end="url(#arw3)" />
+          <rect x="540" y="202" width="340" height="46" fill="#ffffff" stroke="#ed765c" />
+          <text x="556" y="221" font-size="11.5" font-weight="700" fill="#172222">Disallowed &rarr; never fetched</text>
+          <text x="556" y="238" font-size="10.5" fill="#687575">Listed with its reason. Gap kind: blocked.</text>
+          <line x1="270" y1="248" x2="270" y2="260" stroke="#1b7654" stroke-width="1.5" marker-end="url(#arw2)" />
 
-          <!-- 05 -->
-          <rect x="60" y="328" width="360" height="54" fill="#ffffff" stroke="#d8e0dc" />
-          <text x="78" y="350" font-size="13" font-weight="700" fill="#172222">05 &nbsp; Evidence extraction</text>
-          <text x="78" y="369" font-size="11" fill="#687575">Clean text, quote, URL, title, retrieval timestamp.</text>
-          <path d="M420 355 L520 355" stroke="#ed765c" stroke-width="1.5" fill="none" marker-end="url(#arw3)" />
-          <rect x="530" y="328" width="310" height="54" fill="#ffffff" stroke="#ed765c" />
-          <text x="548" y="350" font-size="12" font-weight="700" fill="#172222">Fetch failed &rarr; gap</text>
-          <text x="548" y="369" font-size="11" fill="#687575">Recorded as a named hole in the research.</text>
-          <line x1="240" y1="382" x2="240" y2="402" stroke="#1b7654" stroke-width="1.5" marker-end="url(#arw2)" />
+          <!-- 05 extract -->
+          <rect x="90" y="264" width="360" height="46" fill="#ffffff" stroke="#d8e0dc" />
+          <text x="108" y="283" font-size="12.5" font-weight="700" fill="#172222">05 &nbsp; extract</text>
+          <text x="108" y="300" font-size="10.5" fill="#687575">HTML / XML / PDF to clean text with a timestamp.</text>
+          <path d="M450 287 L530 287" stroke="#ed765c" stroke-width="1.5" fill="none" marker-end="url(#arw3)" />
+          <rect x="540" y="264" width="340" height="46" fill="#ffffff" stroke="#ed765c" />
+          <text x="556" y="283" font-size="11.5" font-weight="700" fill="#172222">Unreadable &rarr; gap</text>
+          <text x="556" y="300" font-size="10.5" fill="#687575">Timeout, scan without text layer. Gap kind: unreachable.</text>
+          <line x1="270" y1="310" x2="270" y2="322" stroke="#1b7654" stroke-width="1.5" marker-end="url(#arw2)" />
 
-          <!-- 06 gate -->
-          <rect x="60" y="406" width="360" height="54" fill="#fff8e4" stroke="#eedb9b" stroke-width="1.5" />
-          <text x="78" y="428" font-size="13" font-weight="700" fill="#172222">06 &nbsp; Independent fact check</text>
-          <text x="78" y="447" font-size="11" fill="#687575">Separate from the agent that produced the claim.</text>
-          <path d="M420 433 L520 433" stroke="#ed765c" stroke-width="1.5" fill="none" marker-end="url(#arw3)" />
-          <rect x="530" y="406" width="310" height="54" fill="#ffffff" stroke="#ed765c" />
-          <text x="548" y="428" font-size="12" font-weight="700" fill="#172222">Unsupported &rarr; withheld</text>
-          <text x="548" y="447" font-size="11" fill="#687575">Never reaches the brief. Surfaces as a gap.</text>
-          <line x1="240" y1="460" x2="240" y2="480" stroke="#1b7654" stroke-width="1.5" marker-end="url(#arw2)" />
+          <!-- 06 claims -->
+          <rect x="90" y="326" width="360" height="46" fill="#ffffff" stroke="#d8e0dc" />
+          <text x="108" y="345" font-size="12.5" font-weight="700" fill="#172222">06 &nbsp; claim_extraction</text>
+          <text x="108" y="362" font-size="10.5" fill="#687575">Model pool proposes claims, each with a quote.</text>
+          <path d="M450 349 L530 349" stroke="#ed765c" stroke-width="1.5" fill="none" marker-end="url(#arw3)" />
+          <rect x="540" y="326" width="340" height="46" fill="#ffffff" stroke="#ed765c" />
+          <text x="556" y="345" font-size="11.5" font-weight="700" fill="#172222">Quote not found in source &rarr; discarded</text>
+          <text x="556" y="362" font-size="10.5" fill="#687575">Counted before any checker tokens are spent.</text>
+          <line x1="270" y1="372" x2="270" y2="384" stroke="#1b7654" stroke-width="1.5" marker-end="url(#arw2)" />
 
-          <!-- 07 -->
-          <rect x="60" y="484" width="360" height="54" fill="#ffffff" stroke="#d8e0dc" />
-          <text x="78" y="506" font-size="13" font-weight="700" fill="#172222">07 &nbsp; Knowledge indexing</text>
-          <text x="78" y="525" font-size="11" fill="#687575">Ledger write, vector upsert, Graphiti episode.</text>
-          <line x1="240" y1="538" x2="240" y2="558" stroke="#1b7654" stroke-width="1.5" marker-end="url(#arw2)" />
+          <!-- 07 fact check -->
+          <rect x="90" y="388" width="360" height="46" fill="#fff8e4" stroke="#eedb9b" stroke-width="1.5" />
+          <text x="108" y="407" font-size="12.5" font-weight="700" fill="#172222">07 &nbsp; fact_check</text>
+          <text x="108" y="424" font-size="10.5" fill="#687575">Numeric guard, then a different model's verdict.</text>
+          <path d="M450 411 L530 411" stroke="#ed765c" stroke-width="1.5" fill="none" marker-end="url(#arw3)" />
+          <rect x="540" y="388" width="340" height="46" fill="#ffffff" stroke="#ed765c" />
+          <text x="556" y="407" font-size="11.5" font-weight="700" fill="#172222">Unsupported &rarr; withheld &middot; national &rarr; flagged</text>
+          <text x="556" y="424" font-size="10.5" fill="#687575">Never reaches the brief as a city figure.</text>
+          <line x1="270" y1="434" x2="270" y2="446" stroke="#1b7654" stroke-width="1.5" marker-end="url(#arw2)" />
 
-          <!-- 08 -->
-          <rect x="60" y="562" width="360" height="54" fill="#d8f3df" stroke="#1b7654" stroke-width="1.5" />
-          <text x="78" y="584" font-size="13" font-weight="700" fill="#172222">08 &nbsp; Brief, graph and Q&amp;A</text>
-          <text x="78" y="603" font-size="11" fill="#1b7654">Findings, gaps, citations, downloadable report.</text>
+          <!-- 08 sufficiency -->
+          <rect x="90" y="450" width="360" height="46" fill="#fff8e4" stroke="#eedb9b" stroke-width="1.5" />
+          <text x="108" y="469" font-size="12.5" font-weight="700" fill="#172222">08 &nbsp; sufficiency</text>
+          <text x="108" y="486" font-size="10.5" fill="#687575">Counts dimensions with city-level verified evidence.</text>
+          <path d="M450 473 L530 473" stroke="#1b7654" stroke-width="1.5" fill="none" marker-end="url(#arw2)" />
+          <rect x="540" y="450" width="340" height="46" fill="#ffffff" stroke="#d8e0dc" />
+          <text x="556" y="469" font-size="11.5" font-weight="700" fill="#172222">&ge; 3 of 5 covered, or rounds spent &rarr; publish</text>
+          <text x="556" y="486" font-size="10.5" fill="#687575">Uncovered dimensions become gaps. Kind: missing.</text>
 
-          <rect x="530" y="484" width="310" height="132" fill="#f5f7f2" stroke="#d8e0dc" stroke-dasharray="4 3" />
-          <text x="548" y="508" font-size="12" font-weight="700" fill="#172222">Knowledge gap ledger</text>
-          <text x="548" y="530" font-size="11" fill="#687575">Every refusal above lands here with its</text>
-          <text x="548" y="546" font-size="11" fill="#687575">topic, reason and source URL, and is</text>
-          <text x="548" y="562" font-size="11" fill="#687575">shown to the user beside the findings.</text>
-          <text x="548" y="590" font-size="11" fill="#1b7654" font-family="'DM Mono', monospace">Absence is a result, not an error.</text>
-          <path d="M530 550 L440 550" stroke="#d8e0dc" stroke-width="1.5" fill="none" />
-          <path d="M440 550 L440 300" stroke="#d8e0dc" stroke-width="1.5" stroke-dasharray="4 3" fill="none" />
+          <!-- loop back -->
+          <path d="M90 473 L44 473 L44 101 L82 101" stroke="#1b7654" stroke-width="1.5" stroke-dasharray="5 4" fill="none" marker-end="url(#arw2)" />
+          <text transform="translate(34 287) rotate(-90)" text-anchor="middle" font-family="'DM Mono', monospace" font-size="9.5" fill="#1b7654">&lt; 3 COVERED &rarr; RE-PLAN FOR THE GAPS, HALF BUDGET</text>
+          <line x1="270" y1="496" x2="270" y2="508" stroke="#1b7654" stroke-width="1.5" marker-end="url(#arw2)" />
+
+          <!-- 09 index -->
+          <rect x="90" y="512" width="360" height="46" fill="#ffffff" stroke="#d8e0dc" />
+          <text x="108" y="531" font-size="12.5" font-weight="700" fill="#172222">09 &nbsp; index</text>
+          <text x="108" y="548" font-size="10.5" fill="#687575">Ledger write and Qdrant upsert, then return.</text>
+          <path d="M450 535 L530 535" stroke="#d8e0dc" stroke-width="1.5" stroke-dasharray="4 3" fill="none" marker-end="url(#arw2)" />
+          <rect x="540" y="512" width="340" height="46" fill="#f5f7f2" stroke="#d8e0dc" stroke-dasharray="4 3" />
+          <text x="556" y="531" font-size="11.5" font-weight="700" fill="#172222">Graphiti build runs in the background</text>
+          <text x="556" y="548" font-size="10.5" fill="#687575">One episode per source, capped at 8. The brief does not wait.</text>
+          <line x1="270" y1="558" x2="270" y2="570" stroke="#1b7654" stroke-width="1.5" marker-end="url(#arw2)" />
+
+          <!-- 10 report -->
+          <rect x="90" y="574" width="360" height="46" fill="#d8f3df" stroke="#1b7654" stroke-width="1.5" />
+          <text x="108" y="593" font-size="12.5" font-weight="700" fill="#172222">10 &nbsp; report</text>
+          <text x="108" y="610" font-size="10.5" fill="#1b7654">Findings, gaps, quality metrics, downloadable brief.</text>
+          <rect x="540" y="574" width="340" height="46" fill="#f5f7f2" stroke="#d8e0dc" stroke-dasharray="4 3" />
+          <text x="556" y="593" font-size="11.5" font-weight="700" fill="#172222">Knowledge gap ledger</text>
+          <text x="556" y="610" font-size="10.5" fill="#687575">withheld &middot; blocked &middot; unreachable &middot; missing</text>
+
+          <text x="90" y="660" font-family="'DM Mono', monospace" font-size="10" fill="#1b7654">Absence is a result, not an error. Every coral branch lands in the gap ledger.</text>
         </g>
       </svg>
     </div>
-    <figcaption>Figure 2 &mdash; Agent responsibilities and refusal paths</figcaption>
+    <figcaption>Figure 2 &mdash; Node responsibilities, refusal paths and the bounded research cycle</figcaption>
   </figure>
 
   <div class="callout">
-    <strong>The trust rule, stated once:</strong> no source quote means no published fact, and no verified evidence means the answer says the evidence is insufficient. Every refusal is written down where the user can see it.
+    <strong>The trust rule, stated once:</strong> no located quote means no claim, no independent verdict means no publication, and no verified evidence means the answer says the evidence is insufficient. Every refusal is written down where the user can see it.
   </div>
 
-  <h2>Data architecture</h2>
+  <h2 id="guards">How fabrication is prevented</h2>
+  <p class="section-note">The guarantees that matter most do not depend on a model behaving well. They are string and number checks that run before or instead of a model call &mdash; which also makes them the cheapest part of the pipeline.</p>
+  <div class="grid">
+    <div class="card">
+      <span class="label">Guard 01 &middot; grounding</span>
+      <h3>Quotes must exist in the source</h3>
+      <p>The extractor's quote is located in the full document text. The span stored is the one found <em>in the document</em>, not the one the model wrote. A quote that cannot be located is discarded and counted.</p>
+    </div>
+    <div class="card">
+      <span class="label">Guard 02 &middot; numeric</span>
+      <h3>Figures must appear in the evidence</h3>
+      <p>Any number in a claim that is absent from its quote makes the claim <code>UNSUPPORTED</code> immediately, with no model opinion involved. This is the &ldquo;never invent statistics&rdquo; rule, enforced.</p>
+    </div>
+    <div class="card">
+      <span class="label">Guard 03 &middot; independence</span>
+      <h3>The checker is never the extractor</h3>
+      <p>The fact checker is chosen from models other than the one that extracted the claim, uses an adversarial prompt, does not see the extractor's reasoning, and returns a schema-constrained verdict including scope.</p>
+    </div>
+  </div>
+
+  <h2 id="models">Model routing</h2>
+  <p class="section-note">No single model is right for every job. Work is routed by what it needs &mdash; long-document reading, short structured verdicts, or bursty graph extraction &mdash; and each role gets its own tokens-per-minute budget. Deployed configuration from <code>render.yaml</code>:</p>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Role</th><th>Model(s)</th><th>Why this choice</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Claim extraction</strong><span class="mono">LLM_EXTRACTION_MODELS</span></td>
+          <td>Pool: <code>qwen/qwen3.8-27b</code>, <code>openai/gpt-oss-120b</code>, <code>openai/gpt-oss-20b</code></td>
+          <td>The throughput bottleneck. Each call is ~3,500 tokens and a free-tier model allows ~8,000 per minute, so one model clears about two sources a minute. Limits are metered per model, so extraction rotates across three and moves to whichever is free soonest.</td>
+        </tr>
+        <tr>
+          <td><strong>Fact check</strong><span class="mono">any model but the extractor</span></td>
+          <td>Fast model first, then graph and pool models, minus the one that extracted</td>
+          <td>Independence is structural. <code>reasoning_effort=low</code> measured 3&times; fewer tokens and 3.4&times; faster with no invalid outputs on a four-field verdict. Strict JSON schema, because loose JSON mode was rejected by the provider about one call in six.</td>
+        </tr>
+        <tr>
+          <td><strong>Planning and answers</strong><span class="mono">LLM_FAST_MODEL</span></td>
+          <td><code>openai/gpt-oss-20b</code></td>
+          <td>Short structured tasks. A small model is faster, has higher rate limits, and both have a deterministic fallback (seed-term plan, extractive answer).</td>
+        </tr>
+        <tr>
+          <td><strong>Knowledge graph</strong><span class="mono">GRAPH_MODEL / GRAPH_FAST_MODEL</span></td>
+          <td><code>openai/gpt-oss-120b</code> / <code>openai/gpt-oss-20b</code></td>
+          <td>Graphiti makes several structured calls per episode. A separate model keeps that work in its own budget instead of starving claim extraction, and it runs after the brief is ready.</td>
+        </tr>
+        <tr>
+          <td><strong>Embeddings</strong><span class="mono">EMBEDDING_PROVIDER</span></td>
+          <td>Local: <code>BAAI/bge-small-en-v1.5</code> in-process (384-d). Render: hosted API with its own key.</td>
+          <td>Local embeddings cost nothing and need no server or GPU, but hold ~186 MB of memory. On a 512 MB host they are moved to an API. One embedder serves Qdrant, Graphiti and the reranker.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 id="throughput">Throughput and resilience on free tiers</h2>
+  <p class="section-note">A free generation tier is not unreliable so much as tightly metered. Most of the engineering in the model boundary exists to spend each per-minute window on work rather than on rejected requests &mdash; and to never pass off a degraded result as a full one.</p>
+  <ol class="steps">
+    <li><strong>Shared cooldown per model.</strong> The first 429 sets a resume time every caller for that model honours. Without it, concurrent callers backed off separately and collided again &mdash; once 75 rejected requests to land 16.</li>
+    <li><strong>Failover, not waiting.</strong> A throttled extraction call moves to the pool model that is free soonest rather than queueing behind the throttled one.</li>
+    <li><strong>A time budget, not a retry count.</strong> Throttled calls retry for up to 300 s using the provider's <code>retry-after</code>. Giving up after three collisions used to drop most fact checks to the weaker rules path in a busy round.</li>
+    <li><strong>Rate limit is not an outage.</strong> Throttling and exhausted quota raise the same SDK exception; they are told apart by the structured error code. Matching words once turned Groq's &ldquo;billing&rdquo; upgrade link into a terminal outage.</li>
+    <li><strong>Half-open circuit breakers.</strong> A terminal error opens the circuit so a dead key costs one call, not one per document; after 120 s a single probe lets a fixed key recover without a restart. Chat and embeddings fail independently.</li>
+    <li><strong>Fallbacks are counted.</strong> Facts checked by rules instead of the model raise a guardrail warning and appear in the run metrics.</li>
+  </ol>
+
+  <h2 id="data">Data architecture</h2>
   <p class="section-note">Three stores because three questions are genuinely different in shape: <em>what happened in this run</em>, <em>what text is semantically near this question</em>, and <em>what is connected to what</em>. Forcing all three into one store makes two of them slow and one of them lossy.</p>
 
   <div class="table-wrap">
@@ -391,80 +515,99 @@
       <tbody>
         <tr>
           <td><strong>Relational</strong><span class="mono">SQLite &rarr; PostgreSQL</span></td>
-          <td>Research runs, discovered sources, crawl decisions, verified facts, knowledge gaps, guardrail outcomes, stage traces, run metrics.</td>
-          <td>This is the audit record. It needs exact reads, stable ordering and a schema, not similarity. It is also the only store that can answer &ldquo;what did the system decide, and when&rdquo;.</td>
-          <td>History, report, admin view</td>
+          <td>Research runs, sources, crawl decisions, verified facts, knowledge gaps, entities, guardrail outcomes, stage traces, run metrics, graph build status.</td>
+          <td>The audit record. It needs exact reads, stable ordering and a schema, not similarity. The only store that is always available, which keeps the system inspectable with no providers configured.</td>
+          <td>History, report, runtime view, Q&amp;A fallback</td>
         </tr>
         <tr>
           <td><strong>Vector</strong><span class="mono">Qdrant Cloud</span></td>
-          <td>Evidence passages with their full fact payload &mdash; claim, quote, source URL, scope, verification status.</td>
-          <td>A City Lead asks questions in their own words, not in the words of the source. Payload filtering by research city keeps one city&rsquo;s evidence out of another city&rsquo;s answer.</td>
+          <td>Verified evidence with its full payload &mdash; claim, quote, source, scope, verification status.</td>
+          <td>A City Lead asks in their own words. Payload filtering by city keeps evidence from leaking between cities. The collection is named after the embedding signature, so vectors from one model are never queried with another; point IDs are <code>uuid5(city, source, claim)</code>, so re-running a city updates in place.</td>
           <td>Every question</td>
         </tr>
         <tr>
-          <td><strong>Graph</strong><span class="mono">Graphiti + Neo4j Sandbox</span></td>
-          <td>Entities and their relationships &mdash; organisations, programmes, policies, places &mdash; grouped per city and timestamped by Graphiti.</td>
-          <td>&ldquo;Who runs what, and how does it connect&rdquo; is a traversal, not a search. Graphiti also gives the memory a time dimension, so a city can be re-researched later without overwriting what was true before.</td>
-          <td>Graph view, entity context</td>
+          <td><strong>Graph</strong><span class="mono">Graphiti + Neo4j</span></td>
+          <td>Typed entities &mdash; <code>Organization</code>, <code>Programme</code>, <code>Policy</code>, <code>HealthIndicator</code>, <code>Place</code> &mdash; and their relationships, grouped per city.</td>
+          <td>&ldquo;Who runs what&rdquo; is a traversal, not a search. Graphiti's bi-temporal tracking lets a city be re-researched without overwriting what was true before. Its three OpenAI-only defaults were replaced: generic JSON-schema client, the system embedder, and an embedding-based reranker.</td>
+          <td>Graph view, every question</td>
         </tr>
       </tbody>
     </table>
   </div>
 
-  <h2>Retrieval strategy</h2>
+  <h2 id="retrieval">Retrieval strategy</h2>
   <ol class="steps">
-    <li><strong>Scope first.</strong> A question is always bound to one researched city before anything is retrieved, so evidence cannot leak between cities.</li>
-    <li><strong>Vector recall.</strong> The question is embedded and matched against city-filtered evidence passages in Qdrant.</li>
-    <li><strong>Ledger fallback.</strong> If the vector store is unavailable or empty, term overlap against verified facts in the relational ledger takes over, so the demo degrades instead of failing.</li>
-    <li><strong>Graph context.</strong> The relationships around the city are fetched from Neo4j and returned alongside the answer, so the user can see structure as well as text.</li>
-    <li><strong>Refuse cleanly.</strong> If nothing verified matches, the system returns an explicit insufficiency response and does not infer.</li>
+    <li><strong>Scope first.</strong> A question is bound to one researched city before anything is retrieved, so evidence cannot leak between cities.</li>
+    <li><strong>Vector and graph concurrently.</strong> Qdrant for semantic recall over verified evidence, <code>graphiti.search()</code> for relationship facts in the city's subgraph.</li>
+    <li><strong>Ledger fallback.</strong> When fewer than three items come back, term matching over the relational ledger tops up the evidence, so retrieval degrades instead of disappearing.</li>
+    <li><strong>Synthesis from numbered evidence.</strong> The fast model must cite evidence numbers; the API resolves them back to stored records, and national evidence must be labelled as national in the sentence that uses it.</li>
+    <li><strong>Refuse cleanly.</strong> No verified match returns an explicit insufficiency answer and the related gaps, not an inference.</li>
   </ol>
 
-  <h2>Key design decisions</h2>
-  <div class="grid grid-2">
+  <h2 id="deploy">Deployment topology</h2>
+  <p class="section-note">The whole stack runs on free tiers. The deciding constraint was memory, and it was measured rather than assumed.</p>
+  <div class="stats">
+    <div class="stat"><b>512 MB</b><span>Render free instance memory limit</span></div>
+    <div class="stat"><b>394 MB</b><span>Idle with the in-process embedding model</span></div>
+    <div class="stat"><b>208 MB</b><span>Idle with hosted embeddings</span></div>
+    <div class="stat"><b>+50&ndash;100 MB</b><span>Added by a research run in flight</span></div>
+  </div>
+  <div class="grid">
     <div class="card">
-      <span class="label">Decision 01</span>
-      <h3>Crawlability is a gate, not a filter</h3>
-      <p>robots.txt is read <em>before</em> the first fetch, not after. A disallowed source still appears in the UI with its refusal reason, so the user can follow it manually. Politeness is visible rather than silent.</p>
+      <span class="label">Render &middot; blueprint</span>
+      <p>Docker web service, <code>/health</code> check, auto-deploy. Groq generation, graph models and <code>EMBEDDING_PROVIDER=api</code> are committed; every credential is <code>sync: false</code> and entered in the dashboard.</p>
     </div>
     <div class="card">
-      <span class="label">Decision 02</span>
-      <h3>Gaps are a first-class output</h3>
-      <p>A withheld claim is not a failure to hide. It is written to the gap ledger with its topic, reason and URL and shown next to the findings, because a City Lead needs to know what they still have to ask about in the room.</p>
+      <span class="label">Hugging Face Spaces</span>
+      <p>Same image on a larger free container. The embedding model is baked into the image, so a cold start does not pay the ~14 s model load inside the first research run.</p>
     </div>
     <div class="card">
-      <span class="label">Decision 03</span>
-      <h3>Scope is carried on every fact</h3>
-      <p>National figures presented as city figures are the most likely way this system could mislead. Every record carries an explicit geographic scope field, and unresolved scope is flagged rather than quietly assumed.</p>
-    </div>
-    <div class="card">
-      <span class="label">Decision 04</span>
-      <h3>Provider failure is surfaced, not swallowed</h3>
-      <p>When a datastore or LLM provider is unavailable the run continues, the store reports its real state in the admin view, and <span class="mono">/api/provider-check</span> gives a sanitised diagnosis without returning credentials.</p>
+      <span class="label">GitHub Pages</span>
+      <p>Optional static frontend. The workflow injects the backend URL at deploy time; the API stays on Render.</p>
     </div>
   </div>
+  <div class="callout">
+    <strong>Credential isolation.</strong> A provider only ever receives its own key. The OpenAI key is sent only to OpenAI; when embeddings use a different provider from generation they use <code>EMBEDDING_API_KEY</code>, and without it fall back to lexical vectors rather than sending the Groq key to a third party. <code>/api/provider-check</code> diagnoses providers without echoing credentials.
+  </div>
 
-  <h2>Trade-offs and what was cut</h2>
+  <h2 id="degradation">Graceful degradation</h2>
+  <p class="section-note">Configuration is not capability. <code>GET /api/runtime</code> reports what the system can actually do right now, and the UI shows a banner when it is running reduced.</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Missing or failing</th><th>What happens instead</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Generation model</strong></td><td>Claims become extractive &mdash; sentences naming the city, selected verbatim, so they still cannot be fabricated. Verification is rule-based, planning uses ontology seed terms, answers list the closest findings. Graph writing is skipped.</td></tr>
+        <tr><td><strong>Embeddings</strong></td><td>Deterministic hashed lexical vectors, in a separately named collection so they never mix with semantic vectors.</td></tr>
+        <tr><td><strong>Qdrant</strong></td><td>Questions are answered from the relational ledger by term matching.</td></tr>
+        <tr><td><strong>Neo4j / Graphiti</strong></td><td>Graph view and graph retrieval are empty and say so; the brief is unaffected.</td></tr>
+        <tr><td><strong>Keyed web search</strong></td><td>Discovery runs on keyless scholarly APIs and records that government and municipal pages are under-represented as a gap.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 id="tradeoffs">Trade-offs and what was cut</h2>
   <ul class="plain">
-    <li><strong>Research breadth was capped deliberately.</strong> A small number of topic queries and a small number of extracted sources per run keeps the end-to-end loop demonstrable inside the timebox. Depth is a tuning problem; the pipeline shape is the hard part.</li>
-    <li><strong>SQLite over managed PostgreSQL.</strong> Zero setup for the case study, and the schema is portable. Local disk on the free tier is ephemeral, so this is explicitly not production storage.</li>
-    <li><strong>No human review step.</strong> The design question &ldquo;should humans review before storage&rdquo; was answered as <em>not yet</em>: the fact-check gate plus a visible gap ledger gives most of the safety, and a review queue would have consumed the remaining time.</li>
-    <li><strong>Single search provider.</strong> A second, independent discovery source would improve both recall and resilience, and is the first thing to add.</li>
-    <li><strong>Conflict handling is unmodelled.</strong> Two sources that disagree currently both appear with their quotes. Detecting and adjudicating contradiction is real work and was consciously deferred.</li>
-    <li><strong>Free hosting sleeps.</strong> First request after idle is slow. Acceptable for evaluation, not for a City Lead on a deadline.</li>
+    <li><strong>Research depth is a user choice.</strong> Quick (5 sources, one round, ~1&ndash;2 min), Balanced (8 sources, optional smaller second round, ~2&ndash;4 min), Thorough (12 sources, ~4&ndash;8 min). Estimates are measured on Groq's free tier and shown as approximate.</li>
+    <li><strong>SQLite over managed PostgreSQL.</strong> Zero setup and a portable schema. Local disk on free hosting is ephemeral, so history resets on restart; the vector store and graph persist.</li>
+    <li><strong>No human review step.</strong> The fact-check gate plus a visible gap ledger gives most of the safety for a fraction of the time.</li>
+    <li><strong>Open-weights models on a hosted free tier</strong> rather than a paid frontier API or a local model. Zero cost and no vendor lock-in, paid for with rate limits &mdash; which the model boundary is built around.</li>
+    <li><strong>Discovery through APIs, not scraped search.</strong> Search engines serve captchas to non-browser clients, and scraping them sits badly beside a crawl-permission gate.</li>
+    <li><strong>Free hosting sleeps.</strong> The first request after idle is slow. Acceptable for evaluation, not for a City Lead on a deadline.</li>
   </ul>
 
   <div class="honest">
     <span class="label">Known limitations in this build</span>
     <ul>
-      <li><strong>Claim extraction is shallow.</strong> Findings are currently source-level rather than statement-level, so the brief tells you which sources are relevant more strongly than it tells you what they say. Grounded, quote-anchored claim extraction is the highest-value next change.</li>
-      <li><strong>Verification is rule-based.</strong> The fact-check gate enforces quote presence, health context and city-scope sanity. It is independent of the producing stage and it does withhold, but it reasons about evidence shape rather than evidence meaning.</li>
-      <li><strong>Graph retrieval is read-only context.</strong> Neo4j is queried live for the graph view; folding traversal results into the answer path is designed but not yet wired into <span class="mono">/api/ask</span>.</li>
+      <li><strong>Conflicting sources are not adjudicated.</strong> Two sources that disagree both appear with their quotes.</li>
+      <li><strong>No OCR.</strong> PDFs are read (capped at 60 pages / 12 MB); a scan without a text layer is recorded as needing OCR.</li>
+      <li><strong>The graph reranker is a bi-encoder.</strong> Cosine similarity on embeddings is less precise than a cross-encoder, chosen because it runs on any embedding endpoint.</li>
+      <li><strong>The graph lags the brief.</strong> It is built in the background and capped at eight episodes per run, so relationships appear a few minutes after findings.</li>
+      <li><strong>No authentication or multi-tenancy.</strong> Required before real use.</li>
     </ul>
   </div>
 
   <h2>How quality is measured</h2>
-  <p class="section-note">The admin view is part of the argument, not a debug panel. It reports source discovery and crawl approval counts, extraction success, evidence coverage, city-scope quality, verified versus withheld facts, gap count, provider errors, guardrail outcomes and per-stage durations &mdash; so a claim about trustworthiness can be checked rather than believed.</p>
+  <p class="section-note">The runtime view is part of the argument, not a debug panel. Each run reports sources discovered, crawl-approved and refused, sources read, candidate versus verified claims, withheld and scope-flagged facts, facts checked by model versus rules, claims extracted by model versus heuristically, dimension coverage, city-scope quality, mean confidence, provider errors, guardrail outcomes and per-stage durations &mdash; so a claim about trustworthiness can be checked rather than believed.</p>
 
   <footer>CARDIO4Cities case study &middot; architecture overview &middot; <a class="back" href="presentation.html">Open the deck &rarr;</a></footer>
 
