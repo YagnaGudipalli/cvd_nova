@@ -44,6 +44,11 @@ Hosted application: <https://cardio4cities-intelligence-studio.onrender.com>
 
 - [ ] Neo4j Sandbox is running and extended; `/health` shows `"graph": true`.
 - [ ] `GET /api/provider-check` shows `tavily`, `qdrant`, `neo4j` and `llm` as `ok`.
+- [ ] Keep Groq quota for the demo. The knowledge graph is written by
+      `openai/gpt-oss-120b`, which has 200,000 tokens a day on the free tier; one
+      city's graph can use tens of thousands. Avoid rehearsal runs on demo day, or
+      upgrade to Groq's Dev tier. When the quota is spent, `/api/graph-status/{city}`
+      shows `RateLimitError` and the graph stays empty while the brief still works.
 - [ ] Open the site a few minutes early: the free Render instance sleeps when idle.
 - [ ] Run one test city on the live site. Research history is on local disk and resets
       when the instance restarts.
