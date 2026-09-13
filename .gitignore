@@ -1,5 +1,17 @@
+# Secrets and local configuration
 .env
+.env.*
+!.env.example
+
+# Local state
+data/
 .venv/
 __pycache__/
 *.pyc
-data/*.db
+.pytest_cache/
+.DS_Store
+
+# Assignment brief and other documents: not for a public repository
+*.docx
+*.doc
+*.pdf
